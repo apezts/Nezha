@@ -1,0 +1,9 @@
+getgenv().Games = {
+    [3823781113] = "https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/saber-simulator.lua",
+}
+
+local id = game.PlaceId
+local url = getgenv().Games[id]
+if url then
+    loadstring(game:HttpGet(url))()
+end
