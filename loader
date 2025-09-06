@@ -1,5 +1,6 @@
 getgenv().Games = {
     [3823781113] = "https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/saber-simulator.lua",
+    [121864768012064] = "https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/fishit",
 }
 
 local id = game.PlaceId
