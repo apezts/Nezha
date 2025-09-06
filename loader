@@ -8,5 +8,5 @@ local url = getgenv().Games[id]
 if url then
     loadstring(game:HttpGet(url))()
 else
-loadstring(game:HttpGet(https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/default))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/default"))()
 end
