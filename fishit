@@ -207,7 +207,7 @@ local stuckfarming = AutoSection:Button({
 local islegendaryfish = nil
 local legendaryfish = AutoSection:Toggle({
     Title = "auto cast",
-    Locked = true,
+    Locked = false,
     Callback = function(state)
         islegendaryfish = state
         if islegendaryfish then
@@ -221,7 +221,7 @@ local legendaryfish = AutoSection:Toggle({
 })
 local claimfish = AutoSection:Button({
     Title = "Claim",
-    Locked = true,
+    Locked = false,
     Callback = function()
         game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
     end
