@@ -34,7 +34,7 @@ local General = Window:Tab({
 local PlayerSection = General:Section({
     Title = "Player",
     Icon = "person-standing",
-    Opened = true,
+    Opened = false,
 })
 local WalkSpeed = PlayerSection:Slider({
     Title = "Walkspeed",
@@ -66,7 +66,7 @@ local Main = Window:Tab({
 local TeleportSection = Main:Section({
     Title = "Teleport",
     Icon = "map-pinned",
-    Opened = true,
+    Opened = false,
 })
 local teleport = nil 
 local TeleportDropdown = TeleportSection:Dropdown({
@@ -143,7 +143,7 @@ Main:Divider()
 local AutoSection = Main:Section({
     Title = "Automatic",
     Icon = "play",
-    Opened = true,
+    Opened = false,
 })
 
 local isautofishing = nil
@@ -166,7 +166,7 @@ local autofishing = AutoSection:Toggle({
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-                task.wait(1)
+                task.wait(0.5)
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
             end
         end
@@ -307,7 +307,7 @@ local Shop = Window:Tab({
 local ShopSection = Shop:Section({
     Title = "Shop",
     Icon = "store",
-    Opened = true,
+    Opened = false,
 })
 local BaitId = nil
 local BaitShop = ShopSection:Dropdown({
@@ -360,7 +360,7 @@ Shop:Divider()
 local WeatherSection = Shop:Section({
     Title = "Weather",
     Icon = "cloud",
-    Opened = true,
+    Opened = false,
 })
 local WeatherSelect = nil
 local WeatherShopdropdown = WeatherSection:Dropdown({
@@ -497,7 +497,7 @@ local AdminEvent = Window:Tab({
 local AdminEventSection = AdminEvent:Section({
     Title = "Admin Event",
     Icon = "rocket",
-    Opened = true,
+    Opened = false,
 })
 
 local AdminEventOption = nil
