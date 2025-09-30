@@ -1,6 +1,13 @@
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/tes%20anti%20afk"))()
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local net = ReplicatedStorage:WaitForChild("Packages")
+    :WaitForChild("_Index")
+    :WaitForChild("sleitnick_net@0.2.0")
+    :WaitForChild("net")
+
+
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
     Title = "Philanx Hub",
@@ -21,7 +28,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v0.0.12",
+    Title = "v0.0.150",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -162,14 +169,12 @@ local autofishing = AutoSection:Toggle({
             game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
             task.wait(0.5)
             while isautofishing do
-                for i = 1, 999 do
-                    task.wait(0.5)
-                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-                end
-            task.wait(1)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+                task.wait(0.5)
+                net:WaitForChild("RE/FishingCompleted"):FireServer()
+                net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
+                net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
+                task.wait(1)
+                net:WaitForChild("RE/FishingCompleted"):FireServer()
             end
         end
     end
