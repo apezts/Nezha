@@ -28,7 +28,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v0.0.150",
+    Title = "v0.0.1",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -173,7 +173,7 @@ local autofishing = AutoSection:Toggle({
                 net:WaitForChild("RE/FishingCompleted"):FireServer()
                 net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
                 net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-                task.wait(1)
+                task.wait(1.5)
                 net:WaitForChild("RE/FishingCompleted"):FireServer()
             end
         end
@@ -193,10 +193,8 @@ local autofishingsteampunk = AutoSection:Toggle({
             game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(true)
             while isautofishingsteampunk do
-                for i = 1, 10 do
-                task.wait(1)
+            task.wait(4)
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-                end
             end
         elseif isautofishingsteampunk == false then
             game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(false)
