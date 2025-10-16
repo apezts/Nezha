@@ -80,7 +80,7 @@ local TeleportDropdown = TeleportSection:Dropdown({
     Title = "Teleport",
     SearchBarEnabled = false,
     MenuWidth = 280,
-    Values = { "Coral Reefs","Creater Island","Esoteric Island","Fisherman Island","Kohana","Kohana Lava","Treasure Ruins","Sisyphus Statue","Tropical Grove","Winter Fest" },
+    Values = { "Coral Reefs","Creater Island","Esoteric Island","Fisherman Island","Kohana","Kohana Lava","Treasure Ruins","Sisyphus Statue","Tropical Grove","Winter Fest","Sacred Temple", },
     Value = nil,
     Callback = function(option) 
         teleport = option 
@@ -110,6 +110,8 @@ local TeleportButton = TeleportSection:Button({
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2047.8, 6.3, 3662.9)
         elseif teleport == "Winter Fest" then
             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1621.8, 4.3, 3287.8)
+        elseif teleport == "Sacred Temple" then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1483.9, -21.9, -621.9)
         end
     end
 })
