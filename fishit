@@ -170,7 +170,7 @@ local autofishing = AutoSection:Toggle({
 				while isautofishing do
 					net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
 					net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-					task.wait(0.9)
+					task.wait(0.8)
 				end
 			end)
 			task.spawn(function()
