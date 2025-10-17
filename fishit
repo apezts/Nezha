@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.1.1",
+    Title = "v.1.2",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -166,21 +166,22 @@ local autofishing = AutoSection:Toggle({
     Callback = function(state) 
         isautofishing = state
         if isautofishing then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
-            task.wait(1)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-            task.wait(0.5)
-            while isautofishing do
-                task.wait(0)
-                net:WaitForChild("RE/FishingCompleted"):FireServer()
-                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
-                net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-                net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-                task.wait(0.5)
-                net:WaitForChild("RE/FishingCompleted"):FireServer()
-            end
-        end
+			task.spawn(function()
+				while isautofishing do
+					net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
+					net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
+					task.wait(0.6)
+				end
+			end)
+			task.spawn(function()
+				while isautofishing do
+					task.wait(0.1)
+					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+				end
+			end)
+        else
+			game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
+		end
     end
 })
 
