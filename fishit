@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.1",
+    Title = "v.0.0.2",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -172,7 +172,7 @@ local autofishing = AutoSection:Toggle({
 				while isautofishing do
 					net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
 					net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-					task.wait(1.4)
+					task.wait(1.2)
 				end
 			end)
 			task.spawn(function()
