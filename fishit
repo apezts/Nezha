@@ -502,7 +502,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
 
 })
 
-local IsAutoBuyWeather = false
+local IsAutoBuyWeather = nil
 local AutoBuyWeather = WeatherSection:Toggle({
     Title = "Auto Buy Weather",
     Icon = "radar",
