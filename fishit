@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.4",
+    Title = "v.0.0.5",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -52,7 +52,7 @@ local WalkSpeed = PlayerSection:Slider({
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
     end
 })
-local JumpHeight = PlayerSection:Slider({
+JumpHeight = PlayerSection:Slider({
     Title = "Jump Height",
     Desc = "Make Jump high!",
     Step = 1,
@@ -155,6 +155,21 @@ local AutoSection = Main:Section({
     Icon = "play",
     Opened = false,
 })
+local delay = nil
+
+local delayreset = AutoSection:Slider({
+    Title = "Delay",
+    Desc = "delay testing!",
+    Step = 0.1,
+    
+    Value = { Min = 0.5, Max = 3.0, Default = 0.5 },
+    Callback = function(value)
+        delay = value
+    end
+})
+
+
+
 
 local isautofishing = nil
 local autofishing = AutoSection:Toggle({
@@ -172,7 +187,8 @@ local autofishing = AutoSection:Toggle({
 				    while isautofishing do
 					    net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
 					    net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-					    task.wait(1.2)
+					    task.wait(delay)
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 				    end
 			    end)
 			    task.spawn(function()
