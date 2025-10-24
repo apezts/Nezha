@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.3",
+    Title = "v.0.0.4",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -169,24 +169,24 @@ local AutoSection = Main:Section({
     Opened = false,
 })
 
-local delayreseting = 1.2
+local delayreseting = 1
 local delayreset = AutoSection:Slider({
     Title = "delay reset",
     Step = 0.1,
     
-    Value = { Min = 0.1, Max = 3, Default = 1.2 },
+    Value = { Min = 0.1, Max = 3, Default = 1 },
     Callback = function(value)
         delayreseting = value
     end
 })
 
-local delayclaiming = 0.1
+local delayclaiming = 0.6
 
 local delayclaim = AutoSection:Slider({
     Title = "delay claim",
     Step = 0.1,
     
-    Value = { Min = 0.1, Max = 3, Default = 0.1 },
+    Value = { Min = 0.1, Max = 3, Default = 0.6 },
     Callback = function(value)
         delayclaiming = value
     end
@@ -538,6 +538,23 @@ local WeatherShopdropbutton = WeatherSection:Button({
         end
     end
 
+})
+
+local isautobuyweather = nil
+local autobuyweather = Main:Toggle({
+    Title = "Auto buy weather",
+    Icon = "radar",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        isautobuyweather = state 
+        while isautobuyweather do
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Wind")
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Cloudy")
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Storm")
+            task.wait(900)
+        end
+    end
 })
 
 local AdminEvent = Window:Tab({
