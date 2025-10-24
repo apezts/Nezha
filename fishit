@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.2",
+    Title = "v.0.0.3",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -169,7 +169,7 @@ local AutoSection = Main:Section({
     Opened = false,
 })
 
-local delayreseting = nil
+local delayreseting = 1.2
 local delayreset = AutoSection:Slider({
     Title = "delay reset",
     Step = 0.1,
@@ -180,7 +180,7 @@ local delayreset = AutoSection:Slider({
     end
 })
 
-local delayclaiming = nil
+local delayclaiming = 0.1
 
 local delayclaim = AutoSection:Slider({
     Title = "delay claim",
@@ -216,8 +216,10 @@ local autofishing = AutoSection:Toggle({
 			    end)
 			    task.spawn(function()
 				    while isautofishing do
-					    task.wait(delayclaiming)
-					    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+						for 1, 2 do
+						    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+							task.wait(delayclaiming)
+						end
 				    end
 			  end)
 		end
