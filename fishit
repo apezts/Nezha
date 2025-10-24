@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.3",
+    Title = "v.0.0.4",
     Color = Color3.fromHex("#0026ff")
 })
 
