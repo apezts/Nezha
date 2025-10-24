@@ -175,7 +175,7 @@ local delaytarik = AutoSection:Slider({
     Desc = "delay testing!",
     Step = 0.1,
     
-    Value = { Min = 0.1, Max = 3.0, Default = 0.5 },
+    Value = { Min = 0.1, Max = 3.0, Default = 0.1 },
     Callback = function(value)
         delayblatan = value
     end
@@ -200,7 +200,7 @@ local autofishing = AutoSection:Toggle({
 				    while isautofishing do
 					    net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
 					    net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-					    task.wait(0.5)
+					    task.wait(delay - 0.2)
                         game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 				        task.wait(delay)
                     end
