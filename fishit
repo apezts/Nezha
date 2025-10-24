@@ -494,4 +494,137 @@ local WeatherShopdropbutton = WeatherSection:Button({
                         end,
                     },
                 }
- 
+            })
+        elseif WeatherSelect == "Radiant" then
+            Window:Dialog({
+                Title = "Price : 50K",
+                Content = "Increase Shiny Chance",
+                Buttons = {
+                    {
+                        Title = "Buy",
+                        Callback = function()
+                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Radiant")
+                        end,
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                        end,
+                    },
+                }
+            })
+        elseif WeatherSelect == "Shark Hunt" then
+            Window:Dialog({
+                Title = "Price : 300K",
+                Content = "Shark Hunt Event",
+                Buttons = {
+                    {
+                        Title = "Buy",
+                        Callback = function()
+                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Shark Hunt")
+                        end,
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                        end,
+                    },
+                }
+            })
+        end
+    end
+
+})
+
+local AdminEvent = Window:Tab({
+    Title = "Admin Event",
+    Icon = "rocket",
+    Locked = false,
+})
+local AdminEventSection = AdminEvent:Section({
+    Title = "Admin Event",
+    Icon = "rocket",
+    Opened = true,
+})
+
+local AdminEventOption = nil
+local AdminEventDropdown = AdminEventSection:Dropdown({
+    Title = "Event Hunt",
+    Values = { "Shark Hunt", "Ghost Shark Hunt", "Megalodon Hunt",},
+    Value = nil,
+    Callback = function(option) 
+        AdminEventOption = option
+    end
+})
+
+local AdminEventButton = AdminEventSection:Button({
+    Title = "Teleport",
+    Locked = false,
+    Callback = function()
+    local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+    local menurings = workspace:FindFirstChild("!!! MENU RINGS")
+    local props = menurings and menurings:FindFirstChild("Props")
+        if AdminEventOption == "Shark Hunt" then
+            local sharkHunt = props and props:FindFirstChild("Shark Hunt")
+
+            if sharkHunt then
+                print(true) -- ✅ kalau ada Shark Hunt
+                
+                local boat = sharkHunt:FindFirstChild("Fishing Boat")
+                if boat then
+                    local part = boat:IsA("Model") and (boat.PrimaryPart or boat:FindFirstChildWhichIsA("BasePart")) or boat
+                    if part then
+                        hrp.CFrame = part.CFrame + Vector3.new(13, 5, 13)
+                    end
+                end
+            else
+                WindUI:Notify({
+                Title = "Philanx Hub",
+                Content = "Shart Hunt not starting!",
+                Duration = 2, -- 3 seconds
+                Icon = "x",})
+            end
+        elseif AdminEventOption == "Ghost Shark Hunt" then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(619.2, 6.9, 3789.5)
+        elseif AdminEventOption == "Megalodon Hunt" then
+            local GhostsharkHunt = props and props:FindFirstChild("Megalodon Hunt")
+
+            if GhostsharkHunt then
+                print(true) -- ✅ kalau ada Ghost Shark Hunt
+                            
+                local boat = GhostsharkHunt:FindFirstChild("Megalodon Hunt")
+                if boat then
+                    local part = boat:IsA("Model") and (boat.PrimaryPart or boat:FindFirstChildWhichIsA("BasePart")) or boat
+                    if part then
+                        hrp.CFrame = part.CFrame + Vector3.new(0, 5, 0)
+                    end
+                end
+            end
+        else
+            WindUI:Notify({
+            Title = "Philanx Hub",
+            Content = "Shart Hunt not starting!",
+            Duration = 2, -- 3 seconds
+            Icon = "x",})
+        end
+    end
+})
+
+
+local tools = Window:Tab({
+    Title = "Tools",
+    Icon = "tool",
+    Locked = false,
+})
+local TeleportButton = tools:Button({
+    Title = "Copy Coordinate",
+    Locked = false,
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local position = player.Character.HumanoidRootPart.Position
+            local formattedPosition = string.format("%.1f, %.1f, %.1f", position.X, position.Y, position.Z)
+            setclipboard(formattedPosition)
+        end
+    end
+})
