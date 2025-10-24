@@ -170,7 +170,7 @@ local AutoSection = Main:Section({
 })
 
 local delayreseting = nil
-local delayreset = PlayerSection:Slider({
+local delayreset = AutoSection:Slider({
     Title = "delay reset",
     Step = 0.1,
     
@@ -182,7 +182,7 @@ local delayreset = PlayerSection:Slider({
 
 local delayclaiming = nil
 
-local delayclaim = PlayerSection:Slider({
+local delayclaim = AutoSection:Slider({
     Title = "delay claim",
     Step = 0.1,
     
