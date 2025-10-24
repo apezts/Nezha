@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.4",
+    Title = "v.0.0.1",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -52,7 +52,7 @@ local WalkSpeed = PlayerSection:Slider({
         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
     end
 })
-JumpHeight = PlayerSection:Slider({
+local JumpHeight = PlayerSection:Slider({
     Title = "Jump Height",
     Desc = "Make Jump high!",
     Step = 1,
@@ -74,48 +74,61 @@ local TeleportSection = Main:Section({
     Icon = "map-pinned",
     Opened = false,
 })
-local teleport = nil 
+-- Tabel lokasi teleport beserta CFrame
+local teleportLocations = {
+    ["Coral Reefs"] = CFrame.new(-2776.1, 4.0, 2150.8),
+    ["Creater Island"] = CFrame.new(950.8, 3.6, 5031.6),
+    ["Esoteric Island"] = CFrame.new(1988.4, 5.2, 1391.3),
+    ["Fisherman Island"] = CFrame.new(34.3, 17.0, 2833.9),
+    ["Kohana"] = CFrame.new(-643.4, 16.0, 620.0),
+    ["Kohana Lava"] = CFrame.new(-654.6, 66.0, 214.7),
+    ["Treasure Ruins"] = CFrame.new(-3598.6, -266.6, -1579.4),
+    ["Sisyphus Statue"] = CFrame.new(-3694.2, -135.6, -1041.1),
+    ["Tropical Grove"] = CFrame.new(-2047.8, 6.3, 3662.9),
+    ["Winter Fest"] = CFrame.new(1621.8, 4.3, 3287.8),
+    ["Sacred Temple"] = CFrame.new(1483.9, -21.9, -621.9),
+    ["Underground Cellar"] = CFrame.new(2103.5, -91.2, -718.8),
+}
+
+-- Ambil semua nama lokasi sebagai array
+local locationNames = {}
+for name, _ in pairs(teleportLocations) do
+    table.insert(locationNames, name)
+end
+table.sort(locationNames) -- Urutkan abjad A-Z
+
+
+-- Variabel pilihan user
+local selectedLocation = nil
+
+-- Dropdown UI
 local TeleportDropdown = TeleportSection:Dropdown({
     Title = "Teleport",
     SearchBarEnabled = false,
     MenuWidth = 280,
-    Values = { "Coral Reefs","Creater Island","Esoteric Island","Fisherman Island","Kohana","Kohana Lava","Treasure Ruins","Sisyphus Statue","Tropical Grove","Winter Fest","Sacred Temple","Underground Cellar", },
+    Values = locationNames,
     Value = nil,
-    Callback = function(option) 
-        teleport = option 
+    Callback = function(option)
+        selectedLocation = option
     end
 })
+
+-- Tombol Teleport
 local TeleportButton = TeleportSection:Button({
     Title = "Teleport",
     Locked = false,
     Callback = function()
-        if teleport == "Coral Reefs" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2776.1, 4.0, 2150.8)
-        elseif teleport == "Creater Island" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(950.8, 3.6, 5031.6)
-        elseif teleport == "Esoteric Island" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1988.4, 5.2, 1391.3)
-        elseif teleport == "Fisherman Island" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(34.3, 17.0, 2833.9)
-        elseif teleport == "Kohana" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-643.4, 16.0, 620.0)
-        elseif teleport == "Kohana Lava" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-654.6, 66.0, 214.7)
-        elseif teleport == "Treasure Ruins" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-3598.6, -266.6, -1579.4)
-        elseif teleport == "Sisyphus Statue" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-3694.2, -135.6, -1041.1)
-        elseif teleport == "Tropical Grove" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2047.8, 6.3, 3662.9)
-        elseif teleport == "Winter Fest" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1621.8, 4.3, 3287.8)
-        elseif teleport == "Sacred Temple" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1483.9, -21.9, -621.9)
-        elseif teleport == "Underground Cellar" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2103.5, -91.2, -718.8)
+        local player = game.Players.LocalPlayer
+        local cframe = teleportLocations[selectedLocation]
+
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and cframe then
+            player.Character.HumanoidRootPart.CFrame = cframe
+        else
+            warn("Teleport gagal. Pastikan karakter dan lokasi valid.")
         end
     end
 })
+
 -- Fetch all player names
 local playerNames = {}
 local players = game.Players:GetPlayers()
@@ -155,34 +168,29 @@ local AutoSection = Main:Section({
     Icon = "play",
     Opened = false,
 })
-local delay = nil
 
-local delayreset = AutoSection:Slider({
-    Title = "Delay reset",
-    Desc = "delay testing!",
+local delayreseting = nil
+local delayreset = PlayerSection:Slider({
+    Title = "delay reset",
     Step = 0.1,
     
-    Value = { Min = 0.5, Max = 3.0, Default = 0.5 },
+    Value = { Min = 0.1, Max = 3, Default = 1.2 },
     Callback = function(value)
-        delay = value
+        delayreseting = value
     end
 })
 
-local delayblatan = nil
+local delayclaiming = nil
 
-local delaytarik = AutoSection:Slider({
-    Title = "Delay blatan",
-    Desc = "delay testing!",
+local delayclaim = PlayerSection:Slider({
+    Title = "delay claim",
     Step = 0.1,
     
-    Value = { Min = 0.1, Max = 3.0, Default = 0.1 },
+    Value = { Min = 0.1, Max = 3, Default = 0.1 },
     Callback = function(value)
-        delayblatan = value
+        delayclaiming = value
     end
 })
-
-
-
 
 local isautofishing = nil
 local autofishing = AutoSection:Toggle({
@@ -194,23 +202,23 @@ local autofishing = AutoSection:Toggle({
     Callback = function(state) 
         isautofishing = state
         if isautofishing then
-			game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
-            task.wait(1)       
+			    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
+          task.wait(1)
 			    task.spawn(function()
-                    while isautofishing do
+				    while isautofishing do
 					    net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
 					    net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-					    task.wait(delay)
-                        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer(
-                    end
+					    task.wait(delayreseting)
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
+				    end
 			    end)
 			    task.spawn(function()
-				    while isautofishing do 
+				    while isautofishing do
+					    task.wait(delayclaiming)
 					    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-				       task.wait(delayblatan)
-                  end
+				    end
 			  end)
-         end
+		end
     end
 })
 
@@ -486,154 +494,4 @@ local WeatherShopdropbutton = WeatherSection:Button({
                         end,
                     },
                 }
-            })
-        elseif WeatherSelect == "Radiant" then
-            Window:Dialog({
-                Title = "Price : 50K",
-                Content = "Increase Shiny Chance",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Radiant")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        elseif WeatherSelect == "Shark Hunt" then
-            Window:Dialog({
-                Title = "Price : 300K",
-                Content = "Shark Hunt Event",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Shark Hunt")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        end
-    end
-
-})
-
-local IsAutoBuyWeather = nil
-local AutoBuyWeather = WeatherSection:Toggle({
-    Title = "Auto Buy Weather",
-    Icon = "radar",
-    Type = "Checkbox",
-    Default = false,
-    Callback = function(state)
-      IsAutoBuyWeather = state
-      while IsAutoBuyWeather do
-		game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Wind")
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Cloudy")
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Storm")
-        task.wait(900)
-      end
-    end
-})
-
-local AdminEvent = Window:Tab({
-    Title = "Admin Event",
-    Icon = "rocket",
-    Locked = false,
-})
-local AdminEventSection = AdminEvent:Section({
-    Title = "Admin Event",
-    Icon = "rocket",
-    Opened = false,
-})
-
-local AdminEventOption = nil
-local AdminEventDropdown = AdminEventSection:Dropdown({
-    Title = "Event Hunt",
-    Values = { "Shark Hunt", "Ghost Shark Hunt", "Megalodon Hunt",},
-    Value = nil,
-    Callback = function(option) 
-        AdminEventOption = option
-    end
-})
-
-local AdminEventButton = AdminEventSection:Button({
-    Title = "Teleport",
-    Locked = false,
-    Callback = function()
-    local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-    local menurings = workspace:FindFirstChild("!!! MENU RINGS")
-    local props = menurings and menurings:FindFirstChild("Props")
-        if AdminEventOption == "Shark Hunt" then
-            local sharkHunt = props and props:FindFirstChild("Shark Hunt")
-
-            if sharkHunt then
-                print(true) -- ✅ kalau ada Shark Hunt
-                
-                local boat = sharkHunt:FindFirstChild("Fishing Boat")
-                if boat then
-                    local part = boat:IsA("Model") and (boat.PrimaryPart or boat:FindFirstChildWhichIsA("BasePart")) or boat
-                    if part then
-                        hrp.CFrame = part.CFrame + Vector3.new(13, 5, 13)
-                    end
-                end
-            else
-                WindUI:Notify({
-                Title = "Philanx Hub",
-                Content = "Shart Hunt not starting!",
-                Duration = 2, -- 3 seconds
-                Icon = "x",})
-            end
-        elseif AdminEventOption == "Ghost Shark Hunt" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(619.2, 6.9, 3789.5)
-        elseif AdminEventOption == "Megalodon Hunt" then
-            local GhostsharkHunt = props and props:FindFirstChild("Megalodon Hunt")
-
-            if GhostsharkHunt then
-                print(true) -- ✅ kalau ada Ghost Shark Hunt
-                            
-                local boat = GhostsharkHunt:FindFirstChild("Megalodon Hunt")
-                if boat then
-                    local part = boat:IsA("Model") and (boat.PrimaryPart or boat:FindFirstChildWhichIsA("BasePart")) or boat
-                    if part then
-                        hrp.CFrame = part.CFrame + Vector3.new(0, 5, 0)
-                    end
-                end
-            end
-        else
-            WindUI:Notify({
-            Title = "Philanx Hub",
-            Content = "Shart Hunt not starting!",
-            Duration = 2, -- 3 seconds
-            Icon = "x",})
-        end
-    end
-})
-
-
-local tools = Window:Tab({
-    Title = "Tools",
-    Icon = "tool",
-    Locked = false,
-})
-local TeleportButton = tools:Button({
-    Title = "Copy Coordinate",
-    Locked = false,
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local position = player.Character.HumanoidRootPart.Position
-            local formattedPosition = string.format("%.1f, %.1f, %.1f", position.X, position.Y, position.Z)
-            setclipboard(formattedPosition)
-        end
-    end
-})
+ 
