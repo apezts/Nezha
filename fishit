@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.7",
+    Title = "v.0.0.8",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -158,7 +158,7 @@ local AutoSection = Main:Section({
 local delay = nil
 
 local delayreset = AutoSection:Slider({
-    Title = "Delay",
+    Title = "Delay reset",
     Desc = "delay testing!",
     Step = 0.1,
     
@@ -171,7 +171,7 @@ local delayreset = AutoSection:Slider({
 local delayblatan = nil
 
 local delaytarik = AutoSection:Slider({
-    Title = "Delay",
+    Title = "Delay blatan",
     Desc = "delay testing!",
     Step = 0.1,
     
@@ -200,9 +200,10 @@ local autofishing = AutoSection:Toggle({
 				    while isautofishing do
 					    net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
 					    net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-					    task.wait(delay)
+					    task.wait(1)
                         game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
-				    end
+				        task.wait(delay)
+                    end
 			    end)
 			    task.spawn(function()
 				    while isautofishing do
