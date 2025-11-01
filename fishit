@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.3",
+    Title = "v.0.0.4",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -212,7 +212,8 @@ local autofishing = AutoSection:Toggle({
 			          net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
 				     -- task.wait(delayreseting)
                       task.wait(delayclaiming)
-                      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
+                      --game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
+                      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 					end
 			    end)
 			    --task.spawn(function()
