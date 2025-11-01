@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.2",
+    Title = "v.0.0.3",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -209,21 +209,20 @@ local autofishing = AutoSection:Toggle({
 			    task.spawn(function()
 				    while isautofishing do
 				      net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-			        net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-						task.wait(delayreseting)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
-						net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-						net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
+			          net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
+				     -- task.wait(delayreseting)
+                      task.wait(delayclaiming)
+                      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 					end
 			    end)
-			    task.spawn(function()
-				    while isautofishing do
-						for i = 1, 2 do
-						    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-							task.wait(delayclaiming)
-						end
-				    end
-			  end)
+			    --task.spawn(function()
+				--    while isautofishing do
+				--		for i = 1, 2 do
+				--		    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+				--			task.wait(delayclaiming)
+				--		end
+				--    end
+			    --end)
 		end
     end
 })
