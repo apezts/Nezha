@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.4",
+    Title = "v.0.0.5",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -88,9 +88,8 @@ local teleportLocations = {
     ["Winter Fest"] = CFrame.new(1621.8, 4.3, 3287.8),
     ["Sacred Temple"] = CFrame.new(1483.9, -21.9, -621.9),
     ["Underground Cellar"] = CFrame.new(2103.5, -91.2, -718.8),
-    ["Crystal Falls"] = CFrame.new(-1956.6, -440.0, 7389.9),
+	["Iron Cavern"] = CFrame.new(-8844.5, -581.8, 131.5),
 }
-
 
 -- Ambil semua nama lokasi sebagai array
 local locationNames = {}
@@ -171,24 +170,24 @@ local AutoSection = Main:Section({
     Opened = false,
 })
 
-local delayreseting = 1.2
+local delayreseting = 1
 local delayreset = AutoSection:Slider({
     Title = "delay reset",
     Step = 0.1,
     
-    Value = { Min = 0.1, Max = 3, Default = 1.2 },
+    Value = { Min = 0.1, Max = 3, Default = 1 },
     Callback = function(value)
         delayreseting = value
     end
 })
 
-local delayclaiming = 0.1
+local delayclaiming = 0.6
 
 local delayclaim = AutoSection:Slider({
     Title = "delay claim",
     Step = 0.1,
     
-    Value = { Min = 0.1, Max = 3, Default = 0.1 },
+    Value = { Min = 0.1, Max = 3, Default = 0.6 },
     Callback = function(value)
         delayclaiming = value
     end
@@ -203,28 +202,35 @@ local autofishing = AutoSection:Toggle({
     Default = false,
     Callback = function(state) 
         isautofishing = state
-        if isautofishing then
-			game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
-          task.wait(1)
-			    task.spawn(function()
-				    while isautofishing do
-				      net:WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-			          net:WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-1.5718746185302734, 1.9918503185920771)
-				     -- task.wait(delayreseting)
-                      task.wait(delayclaiming)
-                      --game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
-                      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+			if isautofishing then
+				game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
+				task.wait(0.01)
+				while isautofishing do
+
+					task.spawn(function()
+						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
+						task.wait(0.01)
+						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1.2854545116425, 1)
+					end)
+
+					task.wait(delayreseting)
+
+					task.spawn(function()
+						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
+						task.wait(0.01)
+						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1.2854545116425, 1)
+					end)
+
+					task.wait(delayclaiming)
+
+					for i = 1, 5 do
+						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+						task.wait(0.01)
 					end
-			    end)
-			    --task.spawn(function()
-				--    while isautofishing do
-				--		for i = 1, 2 do
-				--		    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-				--			task.wait(delayclaiming)
-				--		end
-				--    end
-			    --end)
-		end
+
+					task.wait(0.2 * 0.5)
+				end
+			end
     end
 })
 
@@ -255,19 +261,12 @@ local stuckfarming = AutoSection:Button({
     end
 })
 
-local islegendaryfish = nil
-local legendaryfish = AutoSection:Toggle({
+local legendaryfish = AutoSection:Button({
     Title = "auto cast",
     Locked = false,
     Callback = function(state)
-        islegendaryfish = state
-        if islegendaryfish then
-            while islegendaryfish do
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-0.5718746185302734, 0.9918503185920771)
-                task.wait(3)
-            end
-        end
     end
 })
 local claimfish = AutoSection:Button({
@@ -539,7 +538,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
 })
 
 local isautobuyweather = nil
-local autobuyweather = WeatherSection:Toggle({
+local autobuyweather = Main:Toggle({
     Title = "Auto buy weather",
     Icon = "radar",
     Type = "Checkbox",
