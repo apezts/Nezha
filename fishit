@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.1",
+    Title = "v.0.0.5",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -170,26 +170,19 @@ local AutoSection = Main:Section({
     Opened = false,
 })
 
-local delayreseting = 1
-local delayreset = AutoSection:Slider({
+local delayreset = AutoSection:Input({
     Title = "delay reset",
-    Step = 0.05,
-    
-    Value = { Min = 0.05, Max = 3, Default = 1 },
-    Callback = function(value)
-        delayreseting = value
+    Value = "0.05",
+    Callback = function(input)
+        delayreseting = input
     end
 })
 
-local delayclaiming = 0.6
-
-local delayclaim = AutoSection:Slider({
+local delayclaim = AutoSection:Input({
     Title = "delay claim",
-    Step = 0.1,
-    
-    Value = { Min = 0.1, Max = 3, Default = 0.6 },
-    Callback = function(value)
-        delayclaiming = value
+    Value = "0.05",
+    Callback = function(input)
+        delayclaiming = input
     end
 })
 
@@ -211,6 +204,7 @@ local autofishing = AutoSection:Toggle({
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
 						task.wait(0.01)
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1.2854545116425, 1)
+						task.wait(0.01)
 					end)
 
 					task.wait(delayreseting)
@@ -219,6 +213,7 @@ local autofishing = AutoSection:Toggle({
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
 						task.wait(0.01)
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1.2854545116425, 1)
+						task.wait(0.01)
 					end)
 
 					task.wait(delayclaiming)
