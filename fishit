@@ -173,9 +173,9 @@ local AutoSection = Main:Section({
 local delayreseting = 1
 local delayreset = AutoSection:Slider({
     Title = "delay reset",
-    Step = 0.1,
+    Step = 0.05,
     
-    Value = { Min = 0.1, Max = 3, Default = 1 },
+    Value = { Min = 0.05, Max = 3, Default = 1 },
     Callback = function(value)
         delayreseting = value
     end
@@ -222,12 +222,10 @@ local autofishing = AutoSection:Toggle({
 					end)
 
 					task.wait(delayclaiming)
-
 					for i = 1, 5 do
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 						task.wait(0.01)
 					end
-
 					task.wait(0.2 * 0.5)
 				end
 			end
