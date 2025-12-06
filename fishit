@@ -201,7 +201,7 @@ local autofishing = AutoSection:Toggle({
 			while isautofishing do
 
 				task.wait(delayclaiming)
-					for i = 1, 2 do
+					for i = 1, 5 do
 					pcall(function()
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 					end)
