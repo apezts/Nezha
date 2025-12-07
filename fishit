@@ -170,6 +170,7 @@ local AutoSection = Main:Section({
     Opened = false,
 })
 
+local delayreseting = nil
 local delayreset = AutoSection:Input({
     Title = "delay reset",
     Value = "0.5",
@@ -177,12 +178,20 @@ local delayreset = AutoSection:Input({
         delayreseting = input
     end
 })
-
+local delayclaiming = nil
 local delayclaim = AutoSection:Input({
     Title = "delay claim",
     Value = "1.5",
     Callback = function(input)
         delayclaiming = input
+    end
+})
+local delaytesting = nil
+local delaytest = AutoSection:Input({
+    Title = "delay test",
+    Value = "1",
+    Callback = function(input)
+        delaytesting = input
     end
 })
 
@@ -208,7 +217,7 @@ local autofishing = AutoSection:Toggle({
 
 				task.wait(delayreseting)
 				task.wait(delayclaiming)
-					for i = 1, 10 do
+					for i = 1, delaytesting do
 					pcall(function()
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 					end)
@@ -229,19 +238,21 @@ local autofishing = AutoSection:Toggle({
 
 local isautofishingsteampunk = nil
 local autofishingsteampunk = AutoSection:Toggle({
-    Title = "Auto Fishing",
-    Desc = "Use this when using lower astral rod",
+    Title = "instan fishing",
     Icon = "check",
     Type = "Checkbox",
     Default = false,
     Callback = function(state) 
         isautofishingsteampunk = state
-        if isautofishingsteampunk then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(true)
-        elseif isautofishingsteampunk == false then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UpdateAutoFishingState"):InvokeServer(false)
-        end
+		while isautofishingsteampunk do
+		game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
+		task.wait(0.1)
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-0.5718746185302734, 0.9918503185920771)
+		task.wait(delayclaiming)
+		game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+		task.wait(0.1)
+		end
+
     end
 })
 
