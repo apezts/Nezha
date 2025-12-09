@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.1",
+    Title = "v.0.0.2",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -215,7 +215,7 @@ local autofishing = AutoSection:Toggle({
 					task.wait(delayreseting / 2)
 				end)
 
-				task.wait(delayreseting/4)
+				task.wait(delayreseting/2)
 				task.wait(delayclaiming)
 					for i = 1, delaytesting do
 					pcall(function()
