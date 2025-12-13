@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.2",
+    Title = "v.0.0.5",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -215,14 +215,13 @@ local autofishing = AutoSection:Toggle({
 					task.wait(delayreseting / 2)
 				end)
 
-				task.wait(delayreseting/2)
+				task.wait(delayreseting)
 				task.wait(delayclaiming)
 					for i = 1, delaytesting do
 					pcall(function()
 						game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 					end)
 					task.wait(0.01)
-					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 				end
 
 				task.spawn(function()
@@ -344,12 +343,29 @@ local OxygenOn = Main:Toggle({
         if IsOxygenOn then
             WindUI:Notify({
                 Title = "Philanx Hub",
-                Content = "Radar On!",
+                Content = "oxygen On!",
                 Duration = 2, -- 3 seconds
                 Icon = "check-line",})
             game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/EquipOxygenTank"):InvokeServer(105)
         else
             game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UnequipOxygenTank"):InvokeServer()
+        end
+    end
+})
+
+local IsNotifOn = nil
+local IsNotifOn = Main:Toggle({
+    Title = "Notification",
+	Desc = "Turn Off Fish Notification",
+    Icon = "radar",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        IsNotifOn = state 
+        if IsNotifOn then
+            game:GetService("Players").LocalPlayer.PlayerGui["Small Notification"].Display.Visible = false
+        else
+            game:GetService("Players").LocalPlayer.PlayerGui["Small Notification"].Display.Visible = true
         end
     end
 })
