@@ -89,6 +89,7 @@ local teleportLocations = {
     ["Sacred Temple"] = CFrame.new(1483.9, -21.9, -621.9),
     ["Underground Cellar"] = CFrame.new(2103.5, -91.2, -718.8),
 	["Iron Cavern"] = CFrame.new(-8844.5, -581.8, 131.5),
+	["Christmas Island"] = CFrame.new(1149.1, 23.4, 1534.0),
 }
 
 -- Ambil semua nama lokasi sebagai array
