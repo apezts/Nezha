@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.4",
+    Title = "v.0.0.5",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -76,20 +76,22 @@ local TeleportSection = Main:Section({
 })
 -- Tabel lokasi teleport beserta CFrame
 local teleportLocations = {
-    ["Coral Reefs"] = CFrame.new(-2776.1, 4.0, 2150.8),
-    ["Creater Island"] = CFrame.new(950.8, 3.6, 5031.6),
-    ["Esoteric Island"] = CFrame.new(1988.4, 5.2, 1391.3),
-    ["Fisherman Island"] = CFrame.new(34.3, 17.0, 2833.9),
-    ["Kohana"] = CFrame.new(-643.4, 16.0, 620.0),
+    ["Coral Reefs"] = CFrame.new(-2800.3, 4.0, 2163.3),
+    ["Creater Island"] = CFrame.new(994.4, 2.5, 5012.2),
+    ["Esoteric Island"] = CFrame.new(3298.5, -1302.9, 1370.5),
+    ["Fisherman Island"] = CFrame.new(-83.1, 3.3, 2879.8),
+    ["Kohana"] = CFrame.new(-669.7, 7.8, 675.4),
     ["Kohana Lava"] = CFrame.new(-654.6, 66.0, 214.7),
-    ["Treasure Ruins"] = CFrame.new(-3598.6, -266.6, -1579.4),
-    ["Sisyphus Statue"] = CFrame.new(-3694.2, -135.6, -1041.1),
-    ["Tropical Grove"] = CFrame.new(-2047.8, 6.3, 3662.9),
-    ["Winter Fest"] = CFrame.new(1621.8, 4.3, 3287.8),
-    ["Sacred Temple"] = CFrame.new(1483.9, -21.9, -621.9),
-    ["Underground Cellar"] = CFrame.new(2103.5, -91.2, -718.8),
-	["Iron Cavern"] = CFrame.new(-8844.5, -581.8, 131.5),
+    ["Treasure Ruins"] = CFrame.new(-3597.1, -281.4, -1644.4),
+    ["Sisyphus Statue"] = CFrame.new(-3659.4, -134.1, -962.9),
+    ["Tropical Grove"] = CFrame.new(-2053.4, 6.3, 3663.4),
+    ["Sacred Temple"] = CFrame.new(1451.6, -22.1, -620.7),
+    ["Underground Cellar"] = CFrame.new(2117.9, -91.2, -735.0),
+	["Iron Cavern"] = CFrame.new(-8794.9, -585.0, 90.0),
 	["Christmas Island"] = CFrame.new(1149.1, 23.4, 1534.0),
+	["Ancient Jungle"] = CFrame.new(1483.0, 7.4, -424.3),
+	["Iron Cafe"] = CFrame.new(-8641.5, -547.5, 160.8),
+	["Classic Island"] = CFrame.new(1222.3, 4.0, 2775.1),
 }
 
 -- Ambil semua nama lokasi sebagai array
@@ -221,18 +223,17 @@ local autofishing = AutoSection:Toggle({
 					for i = 1, delaytesting do
 						pcall(function()
 							game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-							task.wait(0.01)
+							--task.wait(0.01)
 						end)
-					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 					task.wait(0.01)
+					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 					end
-
+				task.wait(0.1)
 				task.spawn(function()
 					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
 					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1, 1)
 					task.wait(delayreseting / 2)
 				end)
-
 			end
 			task.wait(0.1)
 		end
