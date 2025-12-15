@@ -27,7 +27,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.0.2",
+    Title = "v.0.0.3",
     Color = Color3.fromHex("#0026ff")
 })
 
@@ -173,7 +173,7 @@ local AutoSection = Main:Section({
 local delayreseting = nil
 local delayreset = AutoSection:Input({
     Title = "delay reset",
-    Value = "0.5",
+    Value = "0.6",
     Callback = function(input)
         delayreseting = input
     end
@@ -181,7 +181,7 @@ local delayreset = AutoSection:Input({
 local delayclaiming = nil
 local delayclaim = AutoSection:Input({
     Title = "delay claim",
-    Value = "1.5",
+    Value = "0.9",
     Callback = function(input)
         delayclaiming = input
     end
@@ -222,7 +222,7 @@ local autofishing = AutoSection:Toggle({
 							game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
 							task.wait(0.01)
 						end)
-					task.wait(0.01)
+					--task.wait(0.01)
                     game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
 					end
 
