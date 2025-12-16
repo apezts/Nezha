@@ -192,7 +192,7 @@ local delayclaim = AutoSection:Input({
 local delaytesting = nil
 local delaytest = AutoSection:Input({
     Title = "delay test",
-    Value = "1",
+    Value = "3",
     Callback = function(input)
         delaytesting = input
     end
