@@ -1,10 +1,152 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/tes%20anti%20afk"))() -- anti AFK
-
+--================================--
+--          SINGKATAN             --
+--================================--
+local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local net = ReplicatedStorage:WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_net@0.2.0")
-    :WaitForChild("net")
+local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
+local equip = net:WaitForChild("RE/EquipToolFromHotbar") -- :FireServer(1)
+local unequip = net:WaitForChild("RE/UnequipToolFromHotbar")
+local charge = net:WaitForChild("RF/ChargeFishingRod") -- :InvokeServer(1755848498.4834)
+local minigame = net:WaitForChild("RF/RequestFishingMinigameStarted") -- :InvokeServer(1, 1)
+local cancel = net:WaitForChild("RF/CancelFishingInputs") -- :InvokeServer()
+local claim = net:WaitForChild("RE/FishingCompleted") -- :FireServer()
+local sellall = net:WaitForChild("RF/SellAllItems")
+local fishingradar = net:WaitForChild("RF/UpdateFishingRadar")
+local fishingoxygen = net:WaitForChild("RF/UnequipOxygenTank")
+local buybait = net:WaitForChild("RF/PurchaseBait")
+local equipbait = net:WaitForChild("RE/EquipBait")
+local buyweather = net:WaitForChild("RF/PurchaseWeatherEvent")
+local buymerchant = net:WaitForChild("RF/PurchaseMarketItem", 9e9)
+--========================================--
+--          Teleport function             --
+--========================================--
+-- Teleport to map
+local teleportLocations = {
+    ["Coral Reefs"] = CFrame.new(-2800.3, 4.0, 2163.3) * CFrame.Angles(0, math.rad(135.5), 0),
+    ["Creater Island"] = CFrame.new(997.6, 0.1, 5018.8) * CFrame.Angles(0, math.rad(-143.0), 0),
+    ["Esoteric Island"] = CFrame.new(3298.5, -1302.9, 1370.5) * CFrame.Angles(0, math.rad(116.0), 0),
+    ["Fisherman Island"] = CFrame.new(-83.1, 3.3, 2879.8) * CFrame.Angles(0, math.rad(116.0), 0),
+    ["Kohana"] = CFrame.new(-669.7, 7.8, 675.4) * CFrame.Angles(0, math.rad(-141.5), 0),
+    ["Kohana Lava"] = CFrame.new(-654.6, 66.0, 214.7) * CFrame.Angles(0, math.rad(-3.0), 0),
+    ["Treasure Ruins"] = CFrame.new(-3597.1, -281.4, -1644.4) * CFrame.Angles(0, math.rad(-23.0), 0),
+    ["Sisyphus Statue"] = CFrame.new(-3659.4, -134.1, -962.9) * CFrame.Angles(0, math.rad(144.0), 0),
+    ["Tropical Grove"] = CFrame.new(-2053.4, 6.3, 3663.4) * CFrame.Angles(0, math.rad(137.5), 0),
+    ["Sacred Temple"] = CFrame.new(1451.6, -22.1, -620.7) * CFrame.Angles(0, math.rad(-178.0), 0),
+    ["Underground Cellar"] = CFrame.new(2117.9, -91.2, -735.0) * CFrame.Angles(0, math.rad(-124.5), 0),
+	  ["Iron Cavern"] = CFrame.new(-8794.9, -585.0, 90.0) * CFrame.Angles(0, math.rad(-54.5), 0),
+	  ["Christmas Island"] = CFrame.new(1149.1, 23.4, 1534.0) * CFrame.Angles(0, math.rad(-165.0), 0),
+	  ["Ancient Jungle"] = CFrame.new(1483.0, 7.4, -424.3) * CFrame.Angles(0, math.rad(83.5), 0),
+	  ["Iron Cafe"] = CFrame.new(-8641.5, -547.5, 160.8) * CFrame.Angles(0, math.rad(-90.0), 0),
+	  ["Classic Island"] = CFrame.new(1222.3, 4.0, 2775.1) * CFrame.Angles(0, math.rad(0.0), 0),
+}
+
+local locationNames = {}
+for name, _ in pairs(teleportLocations) do
+    table.insert(locationNames, name)
+end
+table.sort(locationNames) -- Urutkan abjad A-Z
+
+
+local selectedLocation = nil
+
+-- Teleport to Players
+
+local Players = game:GetService("Players")
+local playerNames = {}
+local nametoteleport = nil
+
+-- 🔁 Ambil semua nama player
+local function getPlayerNames()
+    table.clear(playerNames)
+    for _, player in ipairs(Players:GetPlayers()) do
+        table.insert(playerNames, player.Name)
+    end
+end
+
+-- 🔥 Rebuild dropdown (DESTROY + CREATE)
+local function rebuildDropdown()
+    getPlayerNames()
+
+    -- Hapus dropdown lama (kalau ada)
+    if teleporttoplayerdropdown then
+        teleporttoplayerdropdown:Destroy()
+        teleporttoplayerdropdown = nil
+		local teleporttoplayerdropdown = TeleportSection:Dropdown({
+        Title = "Teleport To Player",
+        Values = playerNames,
+        Value = playerNames[1],
+        Callback = function(option)
+            nametoteleport = option
+        end
+    })
+    end
+end
+
+-- 🔥 Build pertama
+rebuildDropdown()
+
+-- ➕ Player join
+Players.PlayerAdded:Connect(function()
+    task.wait(0.2) -- WAJIB (biar player sudah register)
+    rebuildDropdown()
+end)
+
+-- ➖ Player leave
+Players.PlayerRemoving:Connect(function()
+    task.wait(0.2)
+    rebuildDropdown()
+end)
+--========================================--
+--          Merchant Shop                 --
+--========================================--
+local MerchantList = {
+    {
+        name = "Luck Totem",
+        id = 5
+    },
+}
+
+local MerchantStock = {}
+for _, item in ipairs(MerchantList) do
+    table.insert(MerchantStock, item.name)
+end
+
+local selectmerchant = MerchantList[1]
+
+local MerchantStockid = {}
+for _, item in ipairs(MerchantList) do
+    MerchantStockid[item.name] = item
+end
+
+--========================================--
+--          Auto Present                 --
+--========================================--
+local NameNPC = {
+  "Joe",
+  "Seth",
+  "Billy Bob",
+  "Aura Kid",
+  "Boat Expert",
+  "Scientist",
+  "Seth",
+  "Ron",
+  "Alien Merchant",
+  "Santa",
+  "Scott",
+  "Stickmasterluke",
+  "Merely",
+  "Shedletsky",
+  "Guest",
+  "Builderman",
+  "Noob",
+  "Jeffery",
+  
+}
+local isautopresent = nil
+--========================================--
+--          Core                          --
+--========================================--
+loadstring(game:HttpGet("https://raw.githubusercontent.com/apezts/Nezha/refs/heads/main/tes%20anti%20afk"))() -- anti AFK
 
 
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
@@ -12,7 +154,7 @@ local Window = WindUI:CreateWindow({
     Title = "Philanx Hub",
     Icon = "hand", --Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
     Author = "Philanx",
-    Folder = "WindUI_Example",
+    Folder = "philanx",
     NewElements = true,
 })
 Window:SetToggleKey(Enum.KeyCode.LeftControl)
@@ -74,38 +216,7 @@ local TeleportSection = Main:Section({
     Icon = "map-pinned",
     Opened = false,
 })
--- Tabel lokasi teleport beserta CFrame
-local teleportLocations = {
-    ["Coral Reefs"] = CFrame.new(-2800.3, 4.0, 2163.3),
-    ["Creater Island"] = CFrame.new(994.4, 2.5, 5012.2),
-    ["Esoteric Island"] = CFrame.new(3298.5, -1302.9, 1370.5),
-    ["Fisherman Island"] = CFrame.new(-83.1, 3.3, 2879.8),
-    ["Kohana"] = CFrame.new(-669.7, 7.8, 675.4),
-    ["Kohana Lava"] = CFrame.new(-654.6, 66.0, 214.7),
-    ["Treasure Ruins"] = CFrame.new(-3597.1, -281.4, -1644.4),
-    ["Sisyphus Statue"] = CFrame.new(-3659.4, -134.1, -962.9),
-    ["Tropical Grove"] = CFrame.new(-2053.4, 6.3, 3663.4),
-    ["Sacred Temple"] = CFrame.new(1451.6, -22.1, -620.7),
-    ["Underground Cellar"] = CFrame.new(2117.9, -91.2, -735.0),
-	["Iron Cavern"] = CFrame.new(-8794.9, -585.0, 90.0),
-	["Christmas Island"] = CFrame.new(1149.1, 23.4, 1534.0),
-	["Ancient Jungle"] = CFrame.new(1483.0, 7.4, -424.3),
-	["Iron Cafe"] = CFrame.new(-8641.5, -547.5, 160.8),
-	["Classic Island"] = CFrame.new(1222.3, 4.0, 2775.1),
-}
 
--- Ambil semua nama lokasi sebagai array
-local locationNames = {}
-for name, _ in pairs(teleportLocations) do
-    table.insert(locationNames, name)
-end
-table.sort(locationNames) -- Urutkan abjad A-Z
-
-
--- Variabel pilihan user
-local selectedLocation = nil
-
--- Dropdown UI
 local TeleportDropdown = TeleportSection:Dropdown({
     Title = "Teleport",
     SearchBarEnabled = false,
@@ -122,33 +233,26 @@ local TeleportButton = TeleportSection:Button({
     Title = "Teleport",
     Locked = false,
     Callback = function()
-        local player = game.Players.LocalPlayer
-        local cframe = teleportLocations[selectedLocation]
+		local player = game.Players.LocalPlayer
+		local cframe = teleportLocations[selectedLocation]
 
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and cframe then
-            player.Character.HumanoidRootPart.CFrame = cframe
-        else
-            warn("Teleport gagal. Pastikan karakter dan lokasi valid.")
-        end
+		if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and cframe then
+			player.Character.HumanoidRootPart.CFrame = cframe
+		else
+			warn("Teleport gagal. Pastikan karakter dan lokasi valid.")
+		end
     end
 })
 
--- Fetch all player names
-local playerNames = {}
-local players = game.Players:GetPlayers()
-
-for _, player in ipairs(players) do
-    table.insert(playerNames, player.Name)
-end
-local nametoteleport = nil
 local teleporttoplayerdropdown = TeleportSection:Dropdown({
-    Title = "Teleport To Player",
-    Values = playerNames,
-    Value = playerNames[1] or "No Players",
-    Callback = function(option)
-        nametoteleport = option
-    end
+        Title = "Teleport To Player",
+        Values = playerNames,
+        Value = playerNames[1],
+        Callback = function(option)
+            nametoteleport = option
+        end
 })
+
 local teleporttoplayerbutton = TeleportSection:Button({
     Title = "Teleport",
     Callback = function()
@@ -193,6 +297,7 @@ local delaytesting = nil
 local delaytest = AutoSection:Input({
     Title = "delay test",
     Value = "3",
+    Locked = false,
     Callback = function(input)
         delaytesting = input
     end
@@ -206,35 +311,34 @@ local autofishing = AutoSection:Toggle({
     Type = "Checkbox",
     Default = false,
     Callback = function(state) 
-        isautofishing = state
+    isautofishing = state
 		if isautofishing then
 			task.wait(1)
-			game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar"):FireServer(1)
+			equip:FireServer(1)
 			while isautofishing do
 
 				task.spawn(function()
-					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
-          game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1, 1)
-          task.wait(delayreseting/2)
+					charge:InvokeServer(1755848498.4834)
+					task.wait(0.01)
+          			minigame:InvokeServer(1, 1)
 				end)
 
 				task.wait(delayreseting)
+				
+				task.spawn(function()
+					charge:InvokeServer(1755848498.4834)
+					task.wait(0.01)
+          			minigame:InvokeServer(1, 1)
+				end)
+				
 				task.wait(delayclaiming)
 					for i = 1, delaytesting do
 						pcall(function()
-							--task.wait(0.01)
-							game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
-							--task.wait(0.01)
+							claim:FireServer()
 						end)
 					task.wait(0.01)
-					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
+					cancel:InvokeServer()
 					end
-				
-				task.spawn(function()
-					game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1755848498.4834)
-          game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(1, 1)
-          task.wait(delayreseting/2)
-				end)
 				
 				task.wait(0.2 * 0.5)
 			end
@@ -252,11 +356,11 @@ local autofishingsteampunk = AutoSection:Toggle({
     Callback = function(state) 
         isautofishingsteampunk = state
 		while isautofishingsteampunk do
-		game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
+		charge:InvokeServer(1755848498.4834)
 		task.wait(0.1)
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-0.5718746185302734, 0.9918503185920771)
+    	minigame:InvokeServer(1, 1)
 		task.wait(delayclaiming)
-		game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+		claim:FireServer()
 		task.wait(0.1)
 		end
 
@@ -268,7 +372,7 @@ local stuckfarming = AutoSection:Button({
     Desc = "Click this if autofarm getting stuck",
     Locked = false,
     Callback = function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/CancelFishingInputs"):InvokeServer()
+        cancel:InvokeServer()
     end
 })
 
@@ -276,15 +380,15 @@ local legendaryfish = AutoSection:Button({
     Title = "auto cast",
     Locked = false,
     Callback = function(state)
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/ChargeFishingRod"):InvokeServer(1758965381.937731)
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted"):InvokeServer(-0.5718746185302734, 0.9918503185920771)
+        charge:InvokeServer(1755848498.4834)
+        minigame:InvokeServer(1, 1)
 	end
 })
 local claimfish = AutoSection:Button({
     Title = "Claim",
     Locked = false,
     Callback = function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/FishingCompleted"):FireServer()
+        claim:FireServer()
     end
 })
 
@@ -310,7 +414,7 @@ local autosell = AutoSection:Toggle({
         isautosell = state
         if isautosell then
             while isautosell do
-                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/SellAllItems"):InvokeServer()
+                sellall:InvokeServer()
                 wait(timersell)
             end
         end
@@ -331,9 +435,9 @@ local RadarOn = Main:Toggle({
                 Content = "Oxygen On!",
                 Duration = 2, -- 3 seconds
                 Icon = "check-line",})
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UpdateFishingRadar"):InvokeServer(true)
+            fishingradar:InvokeServer(true)
         else
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UpdateFishingRadar"):InvokeServer(false)
+            fishingradar:InvokeServer(false)
         end
     end
 })
@@ -351,9 +455,9 @@ local OxygenOn = Main:Toggle({
                 Content = "oxygen On!",
                 Duration = 2, -- 3 seconds
                 Icon = "check-line",})
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/EquipOxygenTank"):InvokeServer(105)
+            fishingoxygen:InvokeServer(105)
         else
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/UnequipOxygenTank"):InvokeServer()
+            fishingoxygen:InvokeServer()
         end
     end
 })
@@ -399,29 +503,29 @@ local BaitShopButton = ShopSection:Button({
     Locked = false,
     Callback = function()
         if BaitId == "Topwater Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(10)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(10)
+            buybait:InvokeServer(10)
+            equipbait:FireServer(10)
         elseif BaitId == "Luck Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(2)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(2)
+            buybait:InvokeServer(2)
+            equipbait:FireServer(2)
         elseif BaitId == "Midnight Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(3)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(3)
+            buybait:InvokeServer(3)
+            equipbait:FireServer(3)
         elseif BaitId == "Nature Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(17)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(17)
+            buybait:InvokeServer(17)
+            equipbait:FireServer(17)
         elseif BaitId == "Chroma Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(6)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(6)
+            buybait:InvokeServer(6)
+            equipbait:FireServer(6)
         elseif BaitId == "Dark Matter Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(8)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(8)
+            buybait:InvokeServer(8)
+            equipbait:FireServer(8)
         elseif BaitId == "Corrupt Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(15)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(15)
+            buybait:InvokeServer(15)
+            equipbait:FireServer(15)
         elseif BaitId == "Aether Bait" then
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseBait"):InvokeServer(16)
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RE/EquipBait"):FireServer(16)
+            buybait:InvokeServer(16)
+            equipbait:FireServer(16)
         end
     end
 })
@@ -459,7 +563,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
                     {
                         Title = "Buy",
                         Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Wind")
+                            buyweather:InvokeServer("Wind")
                         end,
                     },
                     {
@@ -478,7 +582,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
                     {
                         Title = "Buy",
                         Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Cloudy")
+                            buyweather:InvokeServer("Cloudy")
                         end,
                     },
                     {
@@ -496,7 +600,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
                     {
                         Title = "Buy",
                         Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Snow")
+                            buyweather:InvokeServer("Snow")
                         end,
                     },
                     {
@@ -514,7 +618,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
                     {
                         Title = "Buy",
                         Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Storm")
+                            buyweather:InvokeServer("Storm")
                         end,
                     },
                     {
@@ -532,7 +636,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
                     {
                         Title = "Buy",
                         Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Radiant")
+                            buyweather:InvokeServer("Radiant")
                         end,
                     },
                     {
@@ -550,7 +654,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
                     {
                         Title = "Buy",
                         Callback = function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Shark Hunt")
+                            buyweather:InvokeServer("Shark Hunt")
                         end,
                     },
                     {
@@ -574,11 +678,69 @@ local autobuyweather = WeatherSection:Toggle({
     Callback = function(state)
         isautobuyweather = state 
         while isautobuyweather do
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Wind")
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Cloudy")
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/PurchaseWeatherEvent"):InvokeServer("Storm")
+            buyweather:InvokeServer("Wind")
+            buyweather:InvokeServer("Cloudy")
+            buyweather:InvokeServer("Storm")
             task.wait(900)
         end
+    end
+})
+
+Shop:Divider()
+local MerchantShopSection = Shop:Section({
+    Title = "Merchant",
+    Icon = "store",
+    Opened = false,
+})
+
+
+local merchantshoptimer = MerchantShopSection:Paragraph({ 
+  Title = "Merchant Shop",
+  Desc = text, 
+  
+})
+--========================================-- 
+-- Merchant Shop -- --========================================--
+local merchanttimer = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.RefreshLabel
+local stock1 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame.Template.Frame.ItemName
+local stock2 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[6].Frame.ItemName
+local stock3 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[5].Frame.ItemName
+task.spawn(function()
+  while true do
+    local timerstock = merchanttimer.ContentText
+    local merchant1 = stock1.ContentText
+    local merchant2 = stock2.ContentText
+    local merchant3 = stock3.ContentText
+    local text = 
+    "Timer : " .. timerstock .. "\n" ..
+    "Stock 1 : " .. merchant1 .. "\n" .. 
+    "Stock 2 : " .. merchant2 .. "\n" .. 
+    "Stock 3 : " .. merchant3 
+    merchantshoptimer:SetDesc(text)
+    task.wait(1)
+    end
+end)
+local merchantshopdropdown = MerchantShopSection:Dropdown({ 
+  Title = "Merchant Shop",
+  SearchBarEnabled = false,
+  MenuWidth = 280,
+  Values = MerchantStock,
+  Value = nil,
+  Callback = function(option) 
+    selectmerchant = option
+  end
+})
+
+local MerchantShopButton = MerchantShopSection:Button({
+    Title = "Merchant Shop",
+    Locked = false,
+    Callback = function()
+      local data = MerchantStockid[selectmerchant]
+      if not data then
+          warn("Merchant belum dipilih")
+          return
+      end
+      buymerchant:InvokeServer(data.id)
     end
 })
 
@@ -607,7 +769,6 @@ local AdminEventButton = AdminEventSection:Button({
     Title = "Teleport",
     Locked = false,
     Callback = function()
-    local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
     local menurings = workspace:FindFirstChild("!!! MENU RINGS")
     local props = menurings and menurings:FindFirstChild("Props")
         if AdminEventOption == "Shark Hunt" then
@@ -656,6 +817,23 @@ local AdminEventButton = AdminEventSection:Button({
     end
 })
 
+local ClaimPresent = AdminEventSection:Toggle({
+  Title = "Auto Claim Present",
+  Icon = "check",
+  Type = "Checkbox",
+  Default = false,
+  Callback = function(state)
+    isautopresent = state
+    while isautopresent do
+      for i = 1, #NameNPC do
+  	    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/SpecialDialogueEvent"):InvokeServer(NameNPC[i],"ChristmasPresents")
+  	    task.wait(3)
+      end
+      task.wait(3600)
+    end
+  end
+})
+
 
 local tools = Window:Tab({
     Title = "Tools",
@@ -667,10 +845,75 @@ local TeleportButton = tools:Button({
     Locked = false,
     Callback = function()
         local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local position = player.Character.HumanoidRootPart.Position
-            local formattedPosition = string.format("%.1f, %.1f, %.1f", position.X, position.Y, position.Z)
-            setclipboard(formattedPosition)
-        end
+		if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+    	local hrp = player.Character.HumanoidRootPart
+    	setclipboard(string.format("CFrame.new(%.1f, %.1f, %.1f) * CFrame.Angles(0, math.rad(%.1f), 0)", hrp.Position.X, hrp.Position.Y, hrp.Position.Z, math.deg(select(2, hrp.CFrame:ToEulerAnglesYXZ()))))
+		end
+    end
+})
+
+local coordstp = nil
+local coordtp = tools:Input({
+    Title = "coord tp",
+    Locked = false,
+    Callback = function(input)
+        coordstp = input
+    end
+})
+local coordtpbutton = tools:Button({
+    Title = "coord tp",
+    Locked = false,
+    Callback = function()
+
+-- ambil X Y Z dari input string
+local X, Y, Z = coordstp:match("(.+),(.+),(.+)")
+X, Y, Z = tonumber(X), tonumber(Y), tonumber(Z)
+
+
+-- teleport 9x
+    hrp.CFrame = CFrame.new(X, Y, Z)
+    hrp.Anchored = true
+    task.wait(3)
+    hrp.Anchored = false
+    end
+})
+
+local function spawn9totem()
+	local pos = hrp.Position
+	local X = pos.X
+	local Y = pos.Y
+	local Z = pos.Z
+
+	local startCFrame = hrp.CFrame
+		
+	local positions = 
+	{
+		{X+51.7, Y,        Z+37.8},
+		{X+51.7, Y-101,    Z+37.8},
+		{X+51.7, Y+101,    Z+37.8},
+
+		{X-48.9, Y,        Z+46.1},
+		{X-48.9, Y+101,    Z+46.1},
+		{X-48.9, Y-101,    Z+46.1},
+
+		{X-9.3,  Y+0.7,    Z-48.1},
+		{X-9.3,  Y+101.7,  Z-48.1},
+		{X-9.3,  Y-100.3,  Z-48.1},
+	}
+	for i = 1, #positions do
+		hrp.CFrame = CFrame.new(positions[i][1], positions[i][2], positions[i][3])
+		hrp.Anchored = true
+		task.wait(3)
+		hrp.Anchored = false
+	end
+	hrp.CFrame = startCFrame
+end
+
+
+local spawn9totem = tools:Button({
+    Title = "Spawn 9 totem",
+    Locked = false,
+    Callback = function()
+	spawn9totem()
     end
 })
