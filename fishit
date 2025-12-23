@@ -17,6 +17,7 @@ local buybait = net:WaitForChild("RF/PurchaseBait")
 local equipbait = net:WaitForChild("RE/EquipBait")
 local buyweather = net:WaitForChild("RF/PurchaseWeatherEvent")
 local buymerchant = net:WaitForChild("RF/PurchaseMarketItem", 9e9)
+local npcFolder = ReplicatedStorage:WaitForChild("NPC")
 --========================================--
 --          Teleport function             --
 --========================================--
@@ -33,11 +34,8 @@ local teleportLocations = {
     ["Tropical Grove"] = CFrame.new(-2053.4, 6.3, 3663.4) * CFrame.Angles(0, math.rad(137.5), 0),
     ["Sacred Temple"] = CFrame.new(1451.6, -22.1, -620.7) * CFrame.Angles(0, math.rad(-178.0), 0),
     ["Underground Cellar"] = CFrame.new(2117.9, -91.2, -735.0) * CFrame.Angles(0, math.rad(-124.5), 0),
-	  ["Iron Cavern"] = CFrame.new(-8794.9, -585.0, 90.0) * CFrame.Angles(0, math.rad(-54.5), 0),
 	  ["Christmas Island"] = CFrame.new(1149.1, 23.4, 1534.0) * CFrame.Angles(0, math.rad(-165.0), 0),
 	  ["Ancient Jungle"] = CFrame.new(1483.0, 7.4, -424.3) * CFrame.Angles(0, math.rad(83.5), 0),
-	  ["Iron Cafe"] = CFrame.new(-8641.5, -547.5, 160.8) * CFrame.Angles(0, math.rad(-90.0), 0),
-	  ["Classic Island"] = CFrame.new(1222.3, 4.0, 2775.1) * CFrame.Angles(0, math.rad(0.0), 0),
 }
 
 local locationNames = {}
@@ -100,10 +98,15 @@ end)
 --          Merchant Shop                 --
 --========================================--
 local MerchantList = {
-    {
-        name = "Luck Totem",
-        id = 5
-    },
+  {
+      name = "Luck Totem",
+      id = 5
+  },
+  {
+      name = "Shiny Totem",
+      id = 7
+  },
+  
 }
 
 local MerchantStock = {}
@@ -121,28 +124,20 @@ end
 --========================================--
 --          Auto Present                 --
 --========================================--
-local NameNPC = {
-  "Joe",
-  "Seth",
-  "Billy Bob",
-  "Aura Kid",
-  "Boat Expert",
-  "Scientist",
-  "Seth",
-  "Ron",
-  "Alien Merchant",
-  "Santa",
-  "Scott",
-  "Stickmasterluke",
-  "Merely",
-  "Shedletsky",
-  "Guest",
-  "Builderman",
-  "Noob",
-  "Jeffery",
-  
-}
-local isautopresent = nil
+local NameNPC = {}
+for _, npc in ipairs(npcFolder:GetChildren()) do
+    table.insert(NameNPC, npc.Name)
+end
+
+--========================================--
+--          No Animation                  --
+--========================================--
+
+local animator=(game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid"):FindFirstChildOfClass("Animator") or Instance.new("Animator",(game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid"))
+
+local anim = nil
+
+
 --========================================--
 --          Core                          --
 --========================================--
@@ -158,6 +153,19 @@ local Window = WindUI:CreateWindow({
     NewElements = true,
 })
 Window:SetToggleKey(Enum.KeyCode.LeftControl)
+Window:EditOpenButton({
+    Title = "Philanx Hub",
+    Icon = "hand",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new( -- gradient
+        Color3.fromHex("FF0F7B"), 
+        Color3.fromHex("F89B29")
+    ),
+    OnlyMobile = false,
+    Enabled = true,
+    Draggable = true,
+})
 WindUI:Notify({
     Title = "Philanx Hub",
     Content = "Success to load!",
@@ -172,8 +180,6 @@ Window:Tag({
     Title = "v.0.1.0",
     Color = Color3.fromHex("#0026ff")
 })
-
-
 local General = Window:Tab({
     Title = "General",
     Icon = "person-standing",
@@ -306,7 +312,7 @@ local delaytest = AutoSection:Input({
 local isautofishing = nil
 local autofishing = AutoSection:Toggle({
     Title = "Auto Fishing",
-    Desc = "Use this when using astral rod or above",
+    Desc = "Use this when using Ghostfin or under it!",
     Icon = "check",
     Type = "Checkbox",
     Default = false,
@@ -336,7 +342,7 @@ local autofishing = AutoSection:Toggle({
 						pcall(function()
 							claim:FireServer()
 						end)
-					task.wait(0.01)
+					task.wait(0.1)
 					cancel:InvokeServer()
 					end
 				
@@ -354,16 +360,16 @@ local autofishingsteampunk = AutoSection:Toggle({
     Type = "Checkbox",
     Default = false,
     Callback = function(state) 
-        isautofishingsteampunk = state
-		while isautofishingsteampunk do
-		charge:InvokeServer(1755848498.4834)
-		task.wait(0.1)
-    	minigame:InvokeServer(1, 1)
-		task.wait(delayclaiming)
-		claim:FireServer()
-		task.wait(0.1)
-		end
-
+      isautofishingsteampunk = state
+		  while isautofishingsteampunk do
+		    charge:InvokeServer(1755848498.4834)
+		    task.wait(0.1)
+    	  minigame:InvokeServer(1, 1)
+	  	  task.wait(delayclaiming)
+		    claim:FireServer()
+		    task.wait(0.4)
+		    cancel:InvokeServer()
+		  end
     end
 })
 
@@ -378,7 +384,7 @@ local stuckfarming = AutoSection:Button({
 
 local legendaryfish = AutoSection:Button({
     Title = "auto cast",
-    Locked = false,
+    Locked = true,
     Callback = function(state)
         charge:InvokeServer(1755848498.4834)
         minigame:InvokeServer(1, 1)
@@ -430,12 +436,12 @@ local RadarOn = Main:Toggle({
     Callback = function(state)
         IsRadarOn = state 
         if IsRadarOn then
-            WindUI:Notify({
-                Title = "Philanx Hub",
-                Content = "Oxygen On!",
-                Duration = 2, -- 3 seconds
-                Icon = "check-line",})
-            fishingradar:InvokeServer(true)
+          WindUI:Notify({
+          Title = "Philanx Hub",
+          Content = "Oxygen On!",
+          Duration = 2, -- 3 seconds
+          Icon = "check-line",})
+          fishingradar:InvokeServer(true)
         else
             fishingradar:InvokeServer(false)
         end
@@ -475,6 +481,23 @@ local IsNotifOn = Main:Toggle({
             game:GetService("Players").LocalPlayer.PlayerGui["Small Notification"].Display.Visible = false
         else
             game:GetService("Players").LocalPlayer.PlayerGui["Small Notification"].Display.Visible = true
+        end
+    end
+})
+local IsAnimOn = nil
+local IsAnim = Main:Toggle({
+    Title = "No Animation",
+    Icon = "radar",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        IsAnimOn = state 
+        if IsAnimOn then
+			anim = game:GetService("ReplicatedStorage").Modules.Animations.ReelingIdle
+            animator:LoadAnimation(anim):Play()
+        else
+			anim = game:GetService("ReplicatedStorage").Modules.Animations.EquipIdle
+            animator:LoadAnimation(anim):Play()
         end
     end
 })
@@ -533,7 +556,12 @@ local rodshopbutton = ShopSection:Button({
     Title = "Rod Shop",
     Callback = function()
     local shoprod = workspace["!!! MENU RINGS"].Ring.ProximityPrompt
+    local lastpos = hrp.CFrame
+    hrp.CFrame = CFrame.new(146.8, 20.4, 2833.1)
+    task.wait(1)
     fireproximityprompt(shoprod)
+    task.wait(1)
+    hrp.CFrame = lastpos
     end
 })
 Shop:Divider()
@@ -695,33 +723,30 @@ local MerchantShopSection = Shop:Section({
 
 
 local merchantshoptimer = MerchantShopSection:Paragraph({ 
-  Title = "Merchant Shop",
+  Title = "Merchant Katalog",
   Desc = text, 
   
 })
 --========================================-- 
--- Merchant Shop -- --========================================--
+--            Merchant Shop               -- 
+--========================================--
+
 local merchanttimer = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.RefreshLabel
+local AncientTimer = workspace["!!! MENU RINGS"]["Event Tracker"].Main.Gui.Content.Items.Countdown.Label
+local christmasStatus = workspace.Map.CavernTeleporter.StartTeleport.Gui.Frame.NewLabel
+
 local stock1 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame.Template.Frame.ItemName
-local stock2 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[6].Frame.ItemName
-local stock3 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[5].Frame.ItemName
-task.spawn(function()
-  while true do
-    local timerstock = merchanttimer.ContentText
-    local merchant1 = stock1.ContentText
-    local merchant2 = stock2.ContentText
-    local merchant3 = stock3.ContentText
-    local text = 
-    "Timer : " .. timerstock .. "\n" ..
-    "Stock 1 : " .. merchant1 .. "\n" .. 
-    "Stock 2 : " .. merchant2 .. "\n" .. 
-    "Stock 3 : " .. merchant3 
-    merchantshoptimer:SetDesc(text)
-    task.wait(1)
-    end
-end)
+local stock2 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[5].Frame.ItemName
+local stock3 --= game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame["Mysterious Crate"].Frame.ItemName
+local mysterycrate = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:FindFirstChild("Mysterious Crate")
+if mysterycrate then
+	stock3 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame["Mysterious Crate"].Frame.ItemName
+
+else
+	stock = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[6].Frame.ItemName
+end
 local merchantshopdropdown = MerchantShopSection:Dropdown({ 
-  Title = "Merchant Shop",
+  Title = "Merchant Buy",
   SearchBarEnabled = false,
   MenuWidth = 280,
   Values = MerchantStock,
@@ -817,23 +842,39 @@ local AdminEventButton = AdminEventSection:Button({
     end
 })
 
-local ClaimPresent = AdminEventSection:Toggle({
-  Title = "Auto Claim Present",
-  Icon = "check",
-  Type = "Checkbox",
-  Default = false,
-  Callback = function(state)
-    isautopresent = state
-    while isautopresent do
-      for i = 1, #NameNPC do
-  	    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/SpecialDialogueEvent"):InvokeServer(NameNPC[i],"ChristmasPresents")
-  	    task.wait(3)
-      end
-      task.wait(3600)
+local ClaimPresent = AdminEventSection:Button({
+  Title = "Auto Present",
+  Locked = false,
+  Callback = function()
+    for i = 1, #NameNPC do
+	    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/SpecialDialogueEvent"):InvokeServer(NameNPC[i],"ChristmasPresents")
+	    task.wait(1)
     end
   end
 })
 
+local EventTimerAncient = AdminEventSection:Paragraph({ 
+  Title = "Ancient Timer Event",
+  Desc = text1, 
+})
+
+local ancientruinevent = AdminEventSection:Button({
+	Title = "Ancient Event",
+    Callback = function(state) 
+  	  hrp.CFrame = CFrame.new(6086.9, -585.9, 4639.9) * CFrame.Angles(0, math.rad(131.8), 0)
+    end
+})
+
+local EventTimerChristmas = AdminEventSection:Paragraph({ 
+  Title = "Christmas Cave Status",
+  Desc = text2, 
+})
+local ChristmasCavenevent = AdminEventSection:Button({
+	Title = "Christmas Event",
+    Callback = function(state) 
+  	  hrp.CFrame = CFrame.new(581.7, -580.6, 8933.7) * CFrame.Angles(0, math.rad(-73.8), 0)
+    end
+})
 
 local tools = Window:Tab({
     Title = "Tools",
@@ -905,6 +946,7 @@ local function spawn9totem()
 		hrp.Anchored = true
 		task.wait(3)
 		hrp.Anchored = false
+		print(i)
 	end
 	hrp.CFrame = startCFrame
 end
@@ -917,3 +959,32 @@ local spawn9totem = tools:Button({
 	spawn9totem()
     end
 })
+
+
+task.spawn(function()
+  while true do
+    local timerstock = merchanttimer.ContentText
+    local eventancienttimer = AncientTimer.ContentText
+    local cavestatus = christmasStatus.ContentText
+    local merchant1 = stock1.ContentText
+    local merchant2 = stock2.ContentText
+    local merchant3 = stock3.ContentText
+    local text =
+    "Timer : " .. timerstock .. "\n\n" ..
+    "Stock 1 : " .. merchant1 .. "\n" .. 
+    "Stock 2 : " .. merchant2 .. "\n" .. 
+    "Stock 3 : " .. merchant3 
+    
+    local text1 = "Timer : " .. eventancienttimer 
+    local text2 
+    if cavestatus == "Christmas Cave" then
+      text2 = "Cave : <font color=\"rgb(0,255,0)\">Open</font>"
+    else
+      text2 = "Cave : <font color=\"rgb(255,0,0)\">closed</font>"
+    end
+    EventTimerAncient:SetDesc(text1)
+    merchantshoptimer:SetDesc(text)
+    EventTimerChristmas:SetDesc(text2)
+    task.wait(1)
+    end
+end)
