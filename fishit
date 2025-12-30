@@ -1,7 +1,7 @@
 --================================--
 --          SINGKATAN             --
 --================================--
-local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
 local equip = net:WaitForChild("RE/EquipToolFromHotbar") -- :FireServer(1)
@@ -18,6 +18,13 @@ local equipbait = net:WaitForChild("RE/EquipBait")
 local buyweather = net:WaitForChild("RF/PurchaseWeatherEvent")
 local buymerchant = net:WaitForChild("RF/PurchaseMarketItem", 9e9)
 local npcFolder = ReplicatedStorage:WaitForChild("NPC")
+local Players = game:GetService("Players")
+--////////////////////
+--      auto tp ke cave
+local lastcoord = nil
+local IsInCave = false
+local AutoTeleportCave = false
+--////////////////////
 --========================================--
 --          Teleport function             --
 --========================================--
@@ -36,6 +43,7 @@ local teleportLocations = {
     ["Underground Cellar"] = CFrame.new(2117.9, -91.2, -735.0) * CFrame.Angles(0, math.rad(-124.5), 0),
 	  ["Christmas Island"] = CFrame.new(1149.1, 23.4, 1534.0) * CFrame.Angles(0, math.rad(-165.0), 0),
 	  ["Ancient Jungle"] = CFrame.new(1483.0, 7.4, -424.3) * CFrame.Angles(0, math.rad(83.5), 0),
+	  ["Ancient Ruins"] = CFrame.new(6086.9, -585.9, 4639.9) * CFrame.Angles(0, math.rad(131.8), 0),
 }
 
 local locationNames = {}
@@ -43,57 +51,38 @@ for name, _ in pairs(teleportLocations) do
     table.insert(locationNames, name)
 end
 table.sort(locationNames) -- Urutkan abjad A-Z
+local selectedLocation
 
 
-local selectedLocation = nil
+local function teleporttolocation(name)
+  local player = game.Players.LocalPlayer
+	local cframe = teleportLocations[selectedLocation]
+	if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and cframe then
+		player.Character.HumanoidRootPart.CFrame = cframe
+	else
+		warn("Teleport gagal. Pastikan karakter dan lokasi valid.")
+	end
+end
 
 -- Teleport to Players
-
-local Players = game:GetService("Players")
 local playerNames = {}
-local nametoteleport = nil
-
--- 🔁 Ambil semua nama player
-local function getPlayerNames()
-    table.clear(playerNames)
-    for _, player in ipairs(Players:GetPlayers()) do
-        table.insert(playerNames, player.Name)
-    end
+local nametoteleport
+for _, player in ipairs(Players:GetPlayers()) do
+  table.insert(playerNames, player.Name)
 end
+table.sort(playerNames) -- Urutkan abjad A-Z
 
--- 🔥 Rebuild dropdown (DESTROY + CREATE)
-local function rebuildDropdown()
-    getPlayerNames()
-
-    -- Hapus dropdown lama (kalau ada)
-    if teleporttoplayerdropdown then
-        teleporttoplayerdropdown:Destroy()
-        teleporttoplayerdropdown = nil
-		local teleporttoplayerdropdown = TeleportSection:Dropdown({
-        Title = "Teleport To Player",
-        Values = playerNames,
-        Value = playerNames[1],
-        Callback = function(option)
-            nametoteleport = option
-        end
-    })
+local function teleporttoplayer()
+  local targetPlayer = game.Players:FindFirstChild(nametoteleport)
+  if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    -- Teleporting your character to the selected player's position
+    local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+    local localPlayerRoot = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if localPlayerRoot then
+      localPlayerRoot.CFrame = CFrame.new(targetPosition)
     end
+  end
 end
-
--- 🔥 Build pertama
-rebuildDropdown()
-
--- ➕ Player join
-Players.PlayerAdded:Connect(function()
-    task.wait(0.2) -- WAJIB (biar player sudah register)
-    rebuildDropdown()
-end)
-
--- ➖ Player leave
-Players.PlayerRemoving:Connect(function()
-    task.wait(0.2)
-    rebuildDropdown()
-end)
 --========================================--
 --          Merchant Shop                 --
 --========================================--
@@ -128,16 +117,212 @@ local NameNPC = {}
 for _, npc in ipairs(npcFolder:GetChildren()) do
     table.insert(NameNPC, npc.Name)
 end
+local function autopresent()
+for i = 1, #NameNPC do
+	    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/SpecialDialogueEvent"):InvokeServer(NameNPC[i],"ChristmasPresents")
+	    task.wait(1)
+    end  
+end
 
 --========================================--
 --          No Animation                  --
 --========================================--
 
-local animator=(game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid"):FindFirstChildOfClass("Animator") or Instance.new("Animator",(game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid"))
+local animator=(Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid"):FindFirstChildOfClass("Animator") or Instance.new("Animator",(Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid"))
 
 local anim = nil
+--========================================--
+--          Bait Shop                  --
+local baitnames = {
+	["Topwater Bait"] = {
+		id = 10,
+		price = 100
+	},
+	["Luck Bait"] = {
+		id = 2,
+		price = 1000
+	},
+	["Midnight Bait"] = {
+		id = 3,
+		price = 3000
+	},
+	["Nature Bait"] = {
+		id = 17,
+		price = 83500
+	},
+	["Chroma Bait"] = {
+		id = 6,
+		price = 290000
+	},
+	["Dark Matter Bait"] = {
+		id = 8,
+		price = 630000
+	},
+	["Corrupt Bait"] = {
+		id = 15,
+		price = 1148484
+	},
+}
+local bait = {}
+for baitname in pairs(baitnames) do
+  table.insert(bait, baitname)
+end
+local BaitId
+local function BaitBuy()
+local asd = baitnames[BaitId]
+local Dialog = Window:Dialog({
+  Icon = "bird",
+  Title = "Wanna buy: "..BaitId.." ??",
+  Content = "Price :"..asd.price,
+  Buttons = {
+    {
+      Title = "Confirm",
+      Callback = function()
+        buybait:InvokeServer(asd.id)
+        equipbait:FireServer(asd.id)
+      end,
+    },
+    {
+      Title = "Cancel",
+      Callback = function()
+      end,
+    },
+  },
+})
+end
+local function buyrod()
+  local lastpos = hrp.CFrame
+  task.wait(5)
+  hrp.CFrame = CFrame.new(146.8, 20.4, 2833.1)
+  local shoprod = workspace["!!! MENU RINGS"].Ring.ProximityPrompt
+  task.wait(5)
+  fireproximityprompt(shoprod)
+  task.wait(5)
+  hrp.CFrame = lastpos
+end
+--========================================--
+--         Weather                         --
+local WeatherSelect
+local listweather = { 
+  ["Wind"] = "10K",
+  ["Cloudy"] = "20K",
+  ["Snow"] = "15K",
+  ["Storm"] = "35K",
+  ["Radiant"] = "50K",
+  ["Shark Hunt"] = "300K",
+}
+local listweathers = {}
+for Name, _ in pairs(listweather) do
+  table.insert(listweathers, Name)
+end
+local function weatherbuy()
+local asd = listweather[WeatherSelect]
+local Dialog = Window:Dialog({
+  Icon = "bird",
+  Title = "Wanna buy: "..WeatherSelect.." ??",
+  Content = "Price :"..asd,
+  Buttons = {
+    {
+      Title = "Confirm",
+      Callback = function()
+        buybait:InvokeServer(asd.id)
+        equipbait:FireServer(asd.id)
+      end,
+    },
+    {
+      Title = "Cancel",
+      Callback = function()
+      end,
+    },
+  },
+})
+end
+--========================================-- 
+--            Merchant Shop               -- 
+--========================================--
 
+local merchanttimer = Players.LocalPlayer.PlayerGui.Merchant.Main.Background.RefreshLabel
+local AncientTimer = workspace["!!! DEPENDENCIES"]["Event Tracker"].Main.Gui.Content.Items.Countdown.Label
+local christmasStatus = workspace.Map.CavernTeleporter.StartTeleport.Gui.Frame.NewLabel
 
+local stock1 = Players.LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame.Template.Frame.ItemName
+local stock2 = Players.LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[5].Frame.ItemName
+local stock3 --= Players.LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame["Mysterious Crate"].Frame.ItemName
+local mysterycrate = Players.LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:FindFirstChild("Mysterious Crate")
+if mysterycrate then
+	stock3 = Players.LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame["Mysterious Crate"].Frame.ItemName
+
+else
+	stock = Players.LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[6].Frame.ItemName
+end
+--========================================--
+--          Admin event                         --
+local AdminEventOption
+local function teleportadminevent()
+  local props = workspace:FindFirstChild("Props")
+    local asd = props and props:FindFirstChild(AdminEventOption)
+    if AdminEventOption == "Ghost Shark Hunt 2" then
+      hrp.CFrame = CFrame.new(627.9, -1.4, 3807.8) * CFrame.Angles(0, math.rad(0.0), 0)
+    else
+    if not asd then
+      WindUI:Notify({
+      Title = "Philanx Hub",
+      Content = AdminEventOption.." not starting!",
+      Duration = 2, -- 3 seconds
+      Icon = "x",})
+    end
+    for i, prop in ipairs(props:GetChildren()) do
+      if prop.Name == AdminEventOption then
+        local boat = prop:FindFirstChild(AdminEventOption)
+        if boat then
+          hrp.CFrame = boat.CFrame + Vector3.new(0, 5, 0)
+        end
+      end
+    end
+  end
+end
+--========================================--
+--          Copy coord                          --
+local function copycoord()
+local player = game.Players.LocalPlayer
+	if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+    local hrp = player.Character.HumanoidRootPart
+    setclipboard(string.format("CFrame.new(%.1f, %.1f, %.1f) * CFrame.Angles(0, math.rad(%.1f), 0)", hrp.Position.X, hrp.Position.Y, hrp.Position.Z, math.deg(select(2, hrp.CFrame:ToEulerAnglesYXZ()))))
+	end  
+end
+
+--========================================--
+--          Spawn 9 totem                 --
+local function spawn9totem()
+	local pos = hrp.Position
+	local X = pos.X
+	local Y = pos.Y
+	local Z = pos.Z
+
+	local startCFrame = hrp.CFrame
+		
+	local positions = 
+	{
+		{X+51.7, Y,        Z+37.8},
+		{X+51.7, Y-101,    Z+37.8},
+		{X+51.7, Y+101,    Z+37.8},
+
+		{X-48.9, Y,        Z+46.1},
+		{X-48.9, Y+101,    Z+46.1},
+		{X-48.9, Y-101,    Z+46.1},
+
+		{X-9.3,  Y+0.7,    Z-48.1},
+		{X-9.3,  Y+101.7,  Z-48.1},
+		{X-9.3,  Y-100.3,  Z-48.1},
+	}
+	for i = 1, #positions do
+		hrp.CFrame = CFrame.new(positions[i][1], positions[i][2], positions[i][3])
+		hrp.Anchored = true
+		task.wait(3)
+		hrp.Anchored = false
+	end
+	hrp.CFrame = startCFrame
+end
 --========================================--
 --          Core                          --
 --========================================--
@@ -177,7 +362,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.1.0",
+    Title = "v.0.1.1",
     Color = Color3.fromHex("#0026ff")
 })
 local General = Window:Tab({
@@ -239,14 +424,7 @@ local TeleportButton = TeleportSection:Button({
     Title = "Teleport",
     Locked = false,
     Callback = function()
-		local player = game.Players.LocalPlayer
-		local cframe = teleportLocations[selectedLocation]
-
-		if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and cframe then
-			player.Character.HumanoidRootPart.CFrame = cframe
-		else
-			warn("Teleport gagal. Pastikan karakter dan lokasi valid.")
-		end
+		  teleporttolocation(selectedLocation)
     end
 })
 
@@ -262,17 +440,7 @@ local teleporttoplayerdropdown = TeleportSection:Dropdown({
 local teleporttoplayerbutton = TeleportSection:Button({
     Title = "Teleport",
     Callback = function()
-        local targetPlayer = game.Players:FindFirstChild(nametoteleport)
-        
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            -- Teleporting your character to the selected player's position
-            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-            local localPlayerRoot = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            
-            if localPlayerRoot then
-                localPlayerRoot.CFrame = CFrame.new(targetPosition)
-            end
-        end
+      teleporttoplayer()
     end
 })
 Main:Divider()
@@ -324,9 +492,9 @@ local autofishing = AutoSection:Toggle({
 			while isautofishing do
 
 				task.spawn(function()
-					charge:InvokeServer(1755848498.4834)
+					charge:InvokeServer(1766574064.4834)
 					task.wait(0.01)
-          			minigame:InvokeServer(1, 1)
+          			minigame:InvokeServer(-1, 1)
 				end)
 
 				task.wait(delayreseting)
@@ -348,7 +516,7 @@ local autofishing = AutoSection:Toggle({
 				
 				task.wait(0.2 * 0.5)
 			end
-			task.wait(0.01)
+			task.wait(0.1)
 		end
     end
 })
@@ -478,9 +646,9 @@ local IsNotifOn = Main:Toggle({
     Callback = function(state)
         IsNotifOn = state 
         if IsNotifOn then
-            game:GetService("Players").LocalPlayer.PlayerGui["Small Notification"].Display.Visible = false
+            Players.LocalPlayer.PlayerGui["Small Notification"].Display.Visible = false
         else
-            game:GetService("Players").LocalPlayer.PlayerGui["Small Notification"].Display.Visible = true
+            Players.LocalPlayer.PlayerGui["Small Notification"].Display.Visible = true
         end
     end
 })
@@ -492,13 +660,6 @@ local IsAnim = Main:Toggle({
     Default = false,
     Callback = function(state)
         IsAnimOn = state 
-        if IsAnimOn then
-			anim = game:GetService("ReplicatedStorage").Modules.Animations.ReelingIdle
-            animator:LoadAnimation(anim):Play()
-        else
-			anim = game:GetService("ReplicatedStorage").Modules.Animations.EquipIdle
-            animator:LoadAnimation(anim):Play()
-        end
     end
 })
 
@@ -512,56 +673,25 @@ local ShopSection = Shop:Section({
     Icon = "store",
     Opened = false,
 })
-local BaitId = nil
 local BaitShop = ShopSection:Dropdown({
     Title = "Bait Shop",
-    Values = { "Topwater Bait","Luck Bait","Midnight Bait","Nature Bait","Chroma Bait","Dark Matter Bait","Corrupt Bait","Aether Bait", },
+    Values = bait,
     Value = nil,
     Callback = function(option) 
-        BaitId = option 
+        BaitId = option
     end
 })
 local BaitShopButton = ShopSection:Button({
     Title = "Buy Bait",
     Locked = false,
     Callback = function()
-        if BaitId == "Topwater Bait" then
-            buybait:InvokeServer(10)
-            equipbait:FireServer(10)
-        elseif BaitId == "Luck Bait" then
-            buybait:InvokeServer(2)
-            equipbait:FireServer(2)
-        elseif BaitId == "Midnight Bait" then
-            buybait:InvokeServer(3)
-            equipbait:FireServer(3)
-        elseif BaitId == "Nature Bait" then
-            buybait:InvokeServer(17)
-            equipbait:FireServer(17)
-        elseif BaitId == "Chroma Bait" then
-            buybait:InvokeServer(6)
-            equipbait:FireServer(6)
-        elseif BaitId == "Dark Matter Bait" then
-            buybait:InvokeServer(8)
-            equipbait:FireServer(8)
-        elseif BaitId == "Corrupt Bait" then
-            buybait:InvokeServer(15)
-            equipbait:FireServer(15)
-        elseif BaitId == "Aether Bait" then
-            buybait:InvokeServer(16)
-            equipbait:FireServer(16)
-        end
+      BaitBuy()
     end
 })
 local rodshopbutton = ShopSection:Button({
     Title = "Rod Shop",
     Callback = function()
-    local shoprod = workspace["!!! MENU RINGS"].Ring.ProximityPrompt
-    local lastpos = hrp.CFrame
-    hrp.CFrame = CFrame.new(146.8, 20.4, 2833.1)
-    task.wait(1)
-    fireproximityprompt(shoprod)
-    task.wait(1)
-    hrp.CFrame = lastpos
+      buyrod()
     end
 })
 Shop:Divider()
@@ -570,10 +700,9 @@ local WeatherSection = Shop:Section({
     Icon = "cloud",
     Opened = false,
 })
-local WeatherSelect = nil
 local WeatherShopdropdown = WeatherSection:Dropdown({
     Title = "Weather Shop",
-    Values = { "Wind","Cloudy","Snow","Storm","Radiant","Shark Hunt", },
+    Values = listweathers,
     Value = nil,
     Callback = function(option) 
         WeatherSelect = option
@@ -583,116 +712,7 @@ local WeatherShopdropbutton = WeatherSection:Button({
     Title = "Buy Weather",
     Locked = false,
     Callback = function()
-        if WeatherSelect == "Wind" then
-            Window:Dialog({
-                Title = "Price : 10K",
-                Content = "Increase Rod Speed",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            buyweather:InvokeServer("Wind")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled!")
-                        end,
-                    },
-                }
-            })
-        elseif WeatherSelect == "Cloudy" then
-            Window:Dialog({
-                Title = "Price : 20K",
-                Content = "Increase luck",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            buyweather:InvokeServer("Cloudy")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        elseif WeatherSelect == "Snow" then
-            Window:Dialog({
-                Title = "Price : 15K",
-                Content = "Adds Frozen Mutations",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            buyweather:InvokeServer("Snow")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        elseif WeatherSelect == "Storm" then
-            Window:Dialog({
-                Title = "Price : 35K",
-                Content = "Increase Rod Speed and Luck",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            buyweather:InvokeServer("Storm")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        elseif WeatherSelect == "Radiant" then
-            Window:Dialog({
-                Title = "Price : 50K",
-                Content = "Increase Shiny Chance",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            buyweather:InvokeServer("Radiant")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        elseif WeatherSelect == "Shark Hunt" then
-            Window:Dialog({
-                Title = "Price : 300K",
-                Content = "Shark Hunt Event",
-                Buttons = {
-                    {
-                        Title = "Buy",
-                        Callback = function()
-                            buyweather:InvokeServer("Shark Hunt")
-                        end,
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                        end,
-                    },
-                }
-            })
-        end
+      weatherbuy()
     end
 
 })
@@ -725,26 +745,7 @@ local MerchantShopSection = Shop:Section({
 local merchantshoptimer = MerchantShopSection:Paragraph({ 
   Title = "Merchant Katalog",
   Desc = text, 
-  
 })
---========================================-- 
---            Merchant Shop               -- 
---========================================--
-
-local merchanttimer = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.RefreshLabel
-local AncientTimer = workspace["!!! MENU RINGS"]["Event Tracker"].Main.Gui.Content.Items.Countdown.Label
-local christmasStatus = workspace.Map.CavernTeleporter.StartTeleport.Gui.Frame.NewLabel
-
-local stock1 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame.Template.Frame.ItemName
-local stock2 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[5].Frame.ItemName
-local stock3 --= game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame["Mysterious Crate"].Frame.ItemName
-local mysterycrate = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:FindFirstChild("Mysterious Crate")
-if mysterycrate then
-	stock3 = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame["Mysterious Crate"].Frame.ItemName
-
-else
-	stock = game:GetService("Players").LocalPlayer.PlayerGui.Merchant.Main.Background.Items.ScrollingFrame:GetChildren()[6].Frame.ItemName
-end
 local merchantshopdropdown = MerchantShopSection:Dropdown({ 
   Title = "Merchant Buy",
   SearchBarEnabled = false,
@@ -780,10 +781,9 @@ local AdminEventSection = AdminEvent:Section({
     Opened = true,
 })
 
-local AdminEventOption = nil
 local AdminEventDropdown = AdminEventSection:Dropdown({
     Title = "Event Hunt",
-    Values = { "Shark Hunt", "Ghost Shark Hunt", "Megalodon Hunt",},
+    Values = { "Shark Hunt", "Ghost Shark Hunt","Ghost Shark Hunt 2", "Megalodon Hunt",},
     Value = nil,
     Callback = function(option) 
         AdminEventOption = option
@@ -794,68 +794,21 @@ local AdminEventButton = AdminEventSection:Button({
     Title = "Teleport",
     Locked = false,
     Callback = function()
-    local menurings = workspace:FindFirstChild("!!! MENU RINGS")
-    local props = menurings and menurings:FindFirstChild("Props")
-        if AdminEventOption == "Shark Hunt" then
-            local sharkHunt = props and props:FindFirstChild("Shark Hunt")
-
-            if sharkHunt then
-                print(true) -- ✅ kalau ada Shark Hunt
-                
-                local boat = sharkHunt:FindFirstChild("Fishing Boat")
-                if boat then
-                    local part = boat:IsA("Model") and (boat.PrimaryPart or boat:FindFirstChildWhichIsA("BasePart")) or boat
-                    if part then
-                        hrp.CFrame = part.CFrame + Vector3.new(13, 5, 13)
-                    end
-                end
-            else
-                WindUI:Notify({
-                Title = "Philanx Hub",
-                Content = "Shart Hunt not starting!",
-                Duration = 2, -- 3 seconds
-                Icon = "x",})
-            end
-        elseif AdminEventOption == "Ghost Shark Hunt" then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(619.2, 6.9, 3789.5)
-        elseif AdminEventOption == "Megalodon Hunt" then
-            local GhostsharkHunt = props and props:FindFirstChild("Megalodon Hunt")
-
-            if GhostsharkHunt then
-                print(true) -- ✅ kalau ada Ghost Shark Hunt
-                            
-                local boat = GhostsharkHunt:FindFirstChild("Megalodon Hunt")
-                if boat then
-                    local part = boat:IsA("Model") and (boat.PrimaryPart or boat:FindFirstChildWhichIsA("BasePart")) or boat
-                    if part then
-                        hrp.CFrame = part.CFrame + Vector3.new(0, 5, 0)
-                    end
-                end
-            end
-        else
-            WindUI:Notify({
-            Title = "Philanx Hub",
-            Content = "Shart Hunt not starting!",
-            Duration = 2, -- 3 seconds
-            Icon = "x",})
-        end
-    end
+    teleportadminevent()
+end
 })
 
 local ClaimPresent = AdminEventSection:Button({
   Title = "Auto Present",
   Locked = false,
   Callback = function()
-    for i = 1, #NameNPC do
-	    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net"):WaitForChild("RF/SpecialDialogueEvent"):InvokeServer(NameNPC[i],"ChristmasPresents")
-	    task.wait(1)
-    end
+    autopresent()
   end
 })
 
 local EventTimerAncient = AdminEventSection:Paragraph({ 
   Title = "Ancient Timer Event",
-  Desc = text1, 
+  Desc = "error", 
 })
 
 local ancientruinevent = AdminEventSection:Button({
@@ -869,10 +822,10 @@ local EventTimerChristmas = AdminEventSection:Paragraph({
   Title = "Christmas Cave Status",
   Desc = text2, 
 })
-local ChristmasCavenevent = AdminEventSection:Button({
-	Title = "Christmas Event",
+local ChristmasCavenevent = AdminEventSection:Toggle({
+	Title = "Auto Christmas Cave",
     Callback = function(state) 
-  	  hrp.CFrame = CFrame.new(581.7, -580.6, 8933.7) * CFrame.Angles(0, math.rad(-73.8), 0)
+      AutoTeleportCave = state
     end
 })
 
@@ -885,11 +838,7 @@ local TeleportButton = tools:Button({
     Title = "Copy Coordinate",
     Locked = false,
     Callback = function()
-        local player = game.Players.LocalPlayer
-		if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-    	local hrp = player.Character.HumanoidRootPart
-    	setclipboard(string.format("CFrame.new(%.1f, %.1f, %.1f) * CFrame.Angles(0, math.rad(%.1f), 0)", hrp.Position.X, hrp.Position.Y, hrp.Position.Z, math.deg(select(2, hrp.CFrame:ToEulerAnglesYXZ()))))
-		end
+      copycoord()
     end
 })
 
@@ -919,39 +868,6 @@ X, Y, Z = tonumber(X), tonumber(Y), tonumber(Z)
     end
 })
 
-local function spawn9totem()
-	local pos = hrp.Position
-	local X = pos.X
-	local Y = pos.Y
-	local Z = pos.Z
-
-	local startCFrame = hrp.CFrame
-		
-	local positions = 
-	{
-		{X+51.7, Y,        Z+37.8},
-		{X+51.7, Y-101,    Z+37.8},
-		{X+51.7, Y+101,    Z+37.8},
-
-		{X-48.9, Y,        Z+46.1},
-		{X-48.9, Y+101,    Z+46.1},
-		{X-48.9, Y-101,    Z+46.1},
-
-		{X-9.3,  Y+0.7,    Z-48.1},
-		{X-9.3,  Y+101.7,  Z-48.1},
-		{X-9.3,  Y-100.3,  Z-48.1},
-	}
-	for i = 1, #positions do
-		hrp.CFrame = CFrame.new(positions[i][1], positions[i][2], positions[i][3])
-		hrp.Anchored = true
-		task.wait(3)
-		hrp.Anchored = false
-		print(i)
-	end
-	hrp.CFrame = startCFrame
-end
-
-
 local spawn9totem = tools:Button({
     Title = "Spawn 9 totem",
     Locked = false,
@@ -963,9 +879,56 @@ local spawn9totem = tools:Button({
 
 task.spawn(function()
   while true do
+     --////////////////////////////////////////////////--
+    --              Christmas Status       --
+    local text2 
+    local cavestatus = christmasStatus.ContentText
+    if cavestatus == "Christmas Cave" then
+      text2 = "Cave : <font color=\"rgb(0,255,0)\">OPEN</font>"
+    else
+      text2 = "Cave : <font color=\"rgb(255,0,0)\">CLOSED</font>"
+    end
+    EventTimerChristmas:SetDesc(text2)
+    if AutoTeleportCave then
+      if cavestatus == "Christmas Cave" and not IsInCave then
+        lastcoord = hrp.CFrame
+        hrp.Anchored = true
+        task.wait(2)
+        hrp.CFrame = CFrame.new(581.7, -582.6, 8933.7) * CFrame.Angles(0, math.rad(-73.8), 0)
+        IsInCave = true
+        hrp.Anchored = false
+      end
+      if cavestatus == "CAVE CLOSED" and IsInCave then
+        if lastcoord then
+          hrp.Anchored = true
+          hrp.CFrame = lastcoord + Vector3.new(0, 2, 0)
+          task.wait(2)
+          hrp.Anchored = false
+        end
+        IsInCave = false
+      end
+    end
+    if AutoTeleportCave == false then
+      IsInCave = false
+    end
+    --////////////////////////////////////////////////--
+    --              No Animation       --
+    local player = game.Players.LocalPlayer
+    if IsAnimOn then
+      local char = player.Character
+            if char then
+                local hum = char:FindFirstChild("Humanoid")
+                if hum then
+                    local anim = hum:FindFirstChild("Animator")
+                    if anim then
+                        anim:Destroy()
+                    end
+                end
+            end
+    end  
+    --////////////////////////////////////////////////--
     local timerstock = merchanttimer.ContentText
     local eventancienttimer = AncientTimer.ContentText
-    local cavestatus = christmasStatus.ContentText
     local merchant1 = stock1.ContentText
     local merchant2 = stock2.ContentText
     local merchant3 = stock3.ContentText
@@ -976,15 +939,8 @@ task.spawn(function()
     "Stock 3 : " .. merchant3 
     
     local text1 = "Timer : " .. eventancienttimer 
-    local text2 
-    if cavestatus == "Christmas Cave" then
-      text2 = "Cave : <font color=\"rgb(0,255,0)\">Open</font>"
-    else
-      text2 = "Cave : <font color=\"rgb(255,0,0)\">closed</font>"
-    end
     EventTimerAncient:SetDesc(text1)
     merchantshoptimer:SetDesc(text)
-    EventTimerChristmas:SetDesc(text2)
     task.wait(1)
     end
 end)
