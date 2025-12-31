@@ -259,27 +259,45 @@ end
 --          Admin event                         --
 local AdminEventOption
 local function teleportadminevent()
-  local props = workspace:FindFirstChild("Props")
-    local asd = props and props:FindFirstChild(AdminEventOption)
+    local props = workspace:FindFirstChild("Props")
+    if not props then return end
+
+    -- Case khusus
     if AdminEventOption == "Ghost Shark Hunt 2" then
-      hrp.CFrame = CFrame.new(627.9, -1.4, 3807.8) * CFrame.Angles(0, math.rad(0.0), 0)
-    else
-    if not asd then
-      WindUI:Notify({
-      Title = "Philanx Hub",
-      Content = AdminEventOption.." not starting!",
-      Duration = 2, -- 3 seconds
-      Icon = "x",})
+        hrp.CFrame =
+            CFrame.new(627.9, -1.4, 3807.8)
+            * CFrame.Angles(0, 0, 0)
+        return
     end
-    for i, prop in ipairs(props:GetChildren()) do
-      if prop.Name == AdminEventOption then
-        local boat = prop:FindFirstChild(AdminEventOption)
-        if boat then
-          hrp.CFrame = boat.CFrame + Vector3.new(0, 5, 0)
+
+    local found = false
+
+    for _, prop in ipairs(props:GetChildren()) do
+        if prop.Name == AdminEventOption then
+            found = true
+
+            -- cari part untuk teleport
+            local target =
+                prop:IsA("Model")
+                and (prop.PrimaryPart or prop:FindFirstChildWhichIsA("BasePart"))
+                or prop
+
+            if target then
+                hrp.CFrame = target.CFrame + Vector3.new(0, 5, 0)
+                return -- STOP setelah teleport
+            end
         end
-      end
     end
-  end
+
+    -- 🔔 notif hanya jika BENAR-BENAR tidak ketemu
+    if not found then
+        WindUI:Notify({
+            Title = "Philanx Hub",
+            Content = AdminEventOption .. " not starting!",
+            Duration = 2,
+            Icon = "x",
+        })
+    end
 end
 --========================================--
 --          Copy coord                          --
@@ -362,7 +380,7 @@ Window:Tag({
     Color = Color3.fromHex("#fbff00")
 })
 Window:Tag({
-    Title = "v.0.1.1",
+    Title = "v.0.?.0",
     Color = Color3.fromHex("#0026ff")
 })
 local General = Window:Tab({
@@ -516,7 +534,7 @@ local autofishing = AutoSection:Toggle({
 				
 				task.wait(0.2 * 0.5)
 			end
-			task.wait(0.1)
+			task.wait(0.01)
 		end
     end
 })
@@ -894,7 +912,7 @@ task.spawn(function()
         lastcoord = hrp.CFrame
         hrp.Anchored = true
         task.wait(2)
-        hrp.CFrame = CFrame.new(581.7, -582.6, 8933.7) * CFrame.Angles(0, math.rad(-73.8), 0)
+        hrp.CFrame = CFrame.new(581.6, -580.6, 8932.4) * CFrame.Angles(0, math.rad(0.3), 0)
         IsInCave = true
         hrp.Anchored = false
       end
